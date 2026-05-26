@@ -2,8 +2,7 @@
 
 ## High-Level Package Diagram
 
-classDiagram
-direction TB
+   classDiagram
     class PresentationLayer {
 	    +FacadePattern
 	    +ServiceAPI
