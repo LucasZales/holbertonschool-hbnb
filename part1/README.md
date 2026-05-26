@@ -1,7 +1,9 @@
 # HBnB Evolution - Technical Documentation
 
 ## High-Level Package Diagram
-
+```mermaid
+classDiagram
+direction TB
     class PresentationLayer {
 	    +FacadePattern
 	    +ServiceAPI
@@ -23,7 +25,7 @@
 
     PresentationLayer <--> BusinessLogicLayer : Facade Pattern
     BusinessLogicLayer <--> PersistenceLayer : Database Operations
-    
+```
 ## Layer Descriptions
 
 ### Presentation Layer -- BRENDAN --
