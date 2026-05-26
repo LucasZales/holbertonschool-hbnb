@@ -29,6 +29,7 @@ direction TB
 ## Layer Descriptions
 
 ### Presentation Layer -- BRENDAN --
+A simplified GUI designed for user simplified user interaction. This layer will handle user interface, input and communication with the backend services. This layer should display public and relevant data to users, handle page navigation and UI interactions. The presentation layer should include login forms, listings, review submission forms, and filtering interfaces.
 
 ### Business Logic Layer -- SEABASS --
 quick basic description goes here
