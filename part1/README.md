@@ -31,6 +31,7 @@ direction TB
 ### Presentation Layer -- BRENDAN --
 
 ### Business Logic Layer -- SEABASS --
+quick basic description goes here
 
 ### Persistence Layer -- LUCAS --
 
