@@ -2,7 +2,6 @@
 
 ## High-Level Package Diagram
 
-   classDiagram
     class PresentationLayer {
 	    +FacadePattern
 	    +ServiceAPI
