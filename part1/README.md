@@ -29,17 +29,15 @@ direction TB
 ## Layer Descriptions
 
 ### Presentation Layer -- BRENDAN --
-The Presentation Layer is a simplified GUI (Graphical User Interface) designed for simplified user interaction. This layer will handle user interface, input and communication with the backend services. This layer should display public and relevant data to users, handle page navigation and UI interactions. The presentation layer should include login forms, listings, review submission forms, and filtering interfaces.
+The Presentation Layer is a simplified Graphical User Interface (GUI) designed for simplified user interaction. This layer will handle user interface, input and communication with the backend services. This layer should display public and relevant data to users, handle page navigation and UI interactions. The presentation layer should include login forms, listings, review submission forms, and filtering interfaces.
 
 ### Business Logic Layer -- SEABASS --
-The Business Logic Layer is the internal logic of the system handling calls passed to it,
-validating requests for data and to save data, and handles all real tasks of the system,
-formating data for saving and understanding the systems state from the database.
+The Business Logic Layer is the core internal logic of the system. It handles calls passed to it,
+validates requests for data and formats data for storage and handling.
 For instance, when a user tries to sign in to the hbnb,
-the Presentation Layer will pass the sign-in details to the BLL (Business Logic Layer),
+the Presentation Layer will pass the sign-in details to the Business Logic Layer (BLL)
 and the BLL will request the appropriate details from the Persistence Layer,
-but the BLL will do the appropriate comparisions and confirm success or failure,
-then respond to the Presentation Layer.
+then do the appropriate comparisons to confirm success or failure. It will then respond to the Presentation Layer, with this confirmation.
 
 ### Persistence Layer -- LUCAS --
 The Persistence Layer is the part of the application that saves and loads data from the database. In this project, it handles storing, updating, deleting, and retrieving information about User, Place, Review, and Amenities. This layer keeps the database logic separate from the rest of the application.
