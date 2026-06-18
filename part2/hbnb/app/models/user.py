@@ -25,7 +25,7 @@ class User:
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 
-    def save(self):
+    def save(self) -> None:
         """Update the updated_at timestamp."""
         self.updated_at = datetime.now()
 
