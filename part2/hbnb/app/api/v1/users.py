@@ -127,4 +127,4 @@ class UserResource(Resource):
             if hasattr(user, key):
                 setattr(user, key, value)
 
-        return api.marshal(user, user_model_input), 200
+        return api.marshal(user, user_model_full), 200

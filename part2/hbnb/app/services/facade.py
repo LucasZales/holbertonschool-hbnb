@@ -1,6 +1,7 @@
 from app.persistence.repository import InMemoryRepository
 from app.models.user import User
 from app.models.amenity import Amenity
+from app.models.place import Place
 
 
 class HBnBFacade:
@@ -29,6 +30,16 @@ class HBnBFacade:
     def get_place(self, place_id):
         # Logic will be implemented in later tasks
         pass
+
+    def create_place(self, place_data):
+        owner = self.user_repo.get(place_data["owner_id"])
+        if not owner:
+            raise ValueError("Owner not found")
+        place_data["owner"] = owner
+        del place_data["owner_id"]
+        place = Place(**place_data)
+        self.place_repo.add(place)
+        return place
 
     # Amenity methods
     def create_amenity(self, amenity_data):
