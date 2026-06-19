@@ -54,6 +54,16 @@ class HBnBFacade:
         """
         return self.user_repo.get_all()
 
+    def update_user(self, user_id: str, user_data: dict) -> User | None:
+        """Update a user object.
+
+        Returns:
+            updated user object
+
+        """
+        self.user_repo.update(user_id, user_data)
+        return self.user_repo.get(user_id)
+
     # Placeholder method for fetching a place by ID
     def get_place(self, place_id: str):
         # Logic will be implemented in later tasks

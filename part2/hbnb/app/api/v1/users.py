@@ -118,13 +118,9 @@ class UserResource(Resource):
 
         """
         user_data = api.payload
-        user = facade.get_user(user_id)
+        user = facade.update_user(user_id, user_data)
 
         if not user:
             return {"error": "User not found"}, 404
-
-        for key, value in user_data.items():
-            if hasattr(user, key):
-                setattr(user, key, value)
 
         return api.marshal(user, user_model_input), 200
