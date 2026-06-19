@@ -4,9 +4,10 @@
 import uuid
 from datetime import datetime
 from app.helpers.email_validator import validate_email
+from app.models.base import Base
 
 
-class User:
+class User(Base):
     """User class for hbnb."""
 
     def __init__(
@@ -17,13 +18,11 @@ class User:
         is_admin: bool = False,
     ) -> None:
         """Init for User class."""
-        self.id = str(uuid.uuid4())
+        super().__init__()
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.is_admin = is_admin
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
 
     def save(self) -> None:
         """Update the updated_at timestamp."""
@@ -37,18 +36,6 @@ class User:
         self.save()
 
     # GETTERS AND SETTERS
-    @property
-    def id(self) -> str:
-        return self.__id
-
-    @id.setter
-    def id(self, id: str) -> None:
-        if not isinstance(id, str):
-            raise TypeError("id must be UUIDv4 of type str")
-        if len(id) != 36:
-            raise TypeError("id must be UUIDv4 of type str")
-        self.__id = id
-
     @property
     def first_name(self) -> str:
         return self.__first_name
@@ -98,19 +85,3 @@ class User:
         if not isinstance(is_admin, bool):
             raise TypeError("is_admin must be bool")
         self.__is_admin = is_admin
-
-    @property
-    def created_at(self) -> datetime:
-        return self.__created_at
-
-    @created_at.setter
-    def created_at(self, created_at: datetime) -> None:
-        self.__created_at = created_at
-
-    @property
-    def updated_at(self) -> datetime:
-        return self.__updated_at
-
-    @updated_at.setter
-    def updated_at(self, updated_at: datetime) -> None:
-        self.__updated_at = updated_at
