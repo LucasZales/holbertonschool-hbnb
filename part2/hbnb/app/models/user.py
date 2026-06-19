@@ -1,8 +1,6 @@
 """Module containing hbnb User class."""
 
 # IMPORTS
-import uuid
-from datetime import datetime
 from app.helpers.email_validator import validate_email
 from app.models.base import Base
 
@@ -23,17 +21,6 @@ class User(Base):
         self.last_name = last_name
         self.email = email
         self.is_admin = is_admin
-
-    def save(self) -> None:
-        """Update the updated_at timestamp."""
-        self.updated_at = datetime.now()
-
-    def update(self, data: dict) -> None:
-        """Update the attributes of the object based on the provided dictionary."""
-        for key, value in data.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-        self.save()
 
     # GETTERS AND SETTERS
     @property
