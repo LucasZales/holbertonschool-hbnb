@@ -13,6 +13,24 @@ class Base:
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 
+    def save(self) -> None:
+        """Update modification timestamp."""
+        self.updated_at = datetime.now()
+
+    def update(self, data: dict) -> None:
+        """Update object attributes.
+
+        Raises:
+            TypeError: If data is not a dictionary.
+
+        """
+        if not isinstance(data, dict):
+            raise TypeError("data must be a dictionary")
+        for key, value in data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        self.save()
+
     @property
     def id(self) -> str:
         return self.__id
@@ -44,21 +62,3 @@ class Base:
         if not isinstance(value, datetime):
             raise TypeError("updated_at must be a datetime")
         self.__updated_at = value
-
-    def save(self) -> None:
-        """Update modification timestamp."""
-        self.updated_at = datetime.now()
-
-    def update(self, data: dict) -> None:
-        """Update object attributes.
-
-        Raises:
-            TypeError: If data is not a dictionary.
-
-        """
-        if not isinstance(data, dict):
-            raise TypeError("data must be a dictionary")
-        for key, value in data.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-        self.save()
