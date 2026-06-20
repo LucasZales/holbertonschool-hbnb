@@ -1,58 +1,15 @@
 """api/v1/places api endpoint."""
 
-from flask_restx import Namespace, Resource, fields
+from flask_restx import Namespace, Resource
 from app.services import facade
+from app.api.v1.api_models import (
+    amenity_model_place as amenity_model,
+    user_model_full as user_model,
+    review_model_place as review_model,
+    place_model,
+)
 
 api = Namespace("places", description="Place operations")
-
-# Define models for related entities
-amenity_model = api.model(
-    "PlaceAmenity",
-    {
-        "id": fields.String(description="Amenity ID"),
-        "name": fields.String(description="Name of the amenity"),
-    },
-)
-
-user_model = api.model(
-    "PlaceUser",
-    {
-        "id": fields.String(description="User ID"),
-        "first_name": fields.String(description="First name of the owner"),
-        "last_name": fields.String(description="Last name of the owner"),
-        "email": fields.String(description="Email of the owner"),
-    },
-)
-
-#review model
-
-review_model = api.model(
-    "PlaceReview",
-    {
-        "id": fields.String(description="Review ID"),
-        "text": fields.String(description="Text of the review"),
-        "rating": fields.Integer(description="Rating of the place"),
-        "user_id": fields.String(description="User ID"),
-    },
-)
-
-# Define the place model for input validation and documentation
-place_model = api.model(
-    "Place",
-    {
-        "title": fields.String(required=True, description="Title of the place"),
-        "description": fields.String(description="Description of the place"),
-        "price": fields.Float(required=True, description="Price per night"),
-        "latitude": fields.Float(required=True, description="Latitude of the place"),
-        "longitude": fields.Float(required=True, description="Longitude of the place"),
-        "owner_id": fields.String(required=True, description="ID of the owner"),
-        "amenities": fields.List(
-            fields.String,
-            required=True,
-            description="List of amenities IDs",
-        ),
-    },
-)
 
 
 @api.route("/")
@@ -121,7 +78,9 @@ class PlaceResource(Resource):
                 "first_name": place.owner.first_name,
                 "last_name": place.owner.last_name,
                 "email": place.owner.email,
-            } if place.owner else None,
+            }
+            if place.owner
+            else None,
             "amenities": [
                 {"id": a.id, "name": a.name}
                 for a in getattr(place, "amenities", [])
@@ -155,11 +114,12 @@ class PlaceResource(Resource):
             "longitude": updated_place.longitude,
         }, 200
 
+
 # endpoint for reviews
+
 
 @api.route("/<place_id>/reviews")
 class PlaceReviewList(Resource):
-
     def get(self, place_id):
         """Get all reviews for a place"""
 

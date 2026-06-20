@@ -1,24 +1,14 @@
 """api/v1/reviews api endpoint."""
 
-from flask_restx import Namespace, Resource, fields
+from flask_restx import Namespace, Resource
 from app.services import facade
+from app.api.v1.api_models import review_model_creation as review_model
 
 api = Namespace("reviews", description="Review operations")
-
-review_model = api.model(
-    "Review",
-    {
-        "text": fields.String(required=True, description="Text of the review"),
-        "rating": fields.Integer(required=True, description="Rating (1-5)"),
-        "user_id": fields.String(required=True, description="User ID"),
-        "place_id": fields.String(required=True, description="Place ID"),
-    },
-)
 
 
 @api.route("/")
 class ReviewList(Resource):
-
     @api.expect(review_model, validate=True)
     def post(self):
         """Create a review"""
@@ -55,7 +45,6 @@ class ReviewList(Resource):
 
 @api.route("/<review_id>")
 class ReviewResource(Resource):
-
     def get(self, review_id):
         """Get review by id"""
         review = facade.get_review(review_id)

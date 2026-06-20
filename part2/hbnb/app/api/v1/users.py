@@ -1,7 +1,8 @@
 """api/v1/users api endpoint."""
 
-from flask_restx import Namespace, Resource, fields
+from flask_restx import Namespace, Resource
 from app.services import facade
+from app.api.v1.api_models import user_model_full, user_model_input
 
 # Any use of @api.response(<status code>, <string>)
 # is for documentation purposes - Seb
@@ -10,39 +11,6 @@ from app.services import facade
 # passing users to it tells it to represent http://address:port/users
 # instead of http://address:port/ for the @api.route() decorator - Seb
 api = Namespace("users", description="User operations")
-
-user_model_input = api.model(
-    "User_Base",
-    {
-        "first_name": fields.String(
-            required=True,
-            description="First name of the user",
-            example="John",
-        ),
-        "last_name": fields.String(
-            required=True,
-            description="Last name of the user",
-            example="Doe",
-        ),
-        "email": fields.String(
-            required=True,
-            description="Email of the user",
-            example="john.doe@example.com",
-            pattern=r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}",
-        ),
-    },
-)
-user_model_full = api.inherit(
-    "User_Full",
-    user_model_input,
-    {
-        "id": fields.String(
-            required=False,
-            description="id of the user",
-            example="1e408ff9-e4c3-4a31-9058-089a94494c99",
-        ),
-    },
-)
 
 
 @api.route("/")
