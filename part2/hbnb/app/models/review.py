@@ -1,6 +1,4 @@
 from app.models.base import Base
-from app.models.user import User
-from app.models.place import Place
 
 
 class Review(Base):
@@ -17,10 +15,10 @@ class Review(Base):
         if rating < 1 or rating > 5:
             raise ValueError("rating must be between 1 and 5")
 
-        if not isinstance(user, User):
+        if not isinstance(user, Base):
             raise TypeError("user must be a User instance")
 
-        if not isinstance(place, Place):
+        if not isinstance(place, Base):
             raise TypeError("place must be a Place instance")
 
         self.text = text

@@ -1,9 +1,6 @@
 """Module containing Place Class."""
 
 from app.models.base import Base
-from app.models.user import User
-from app.models.amenity import Amenity
-from app.models.review import Review
 
 
 class Place(Base):
@@ -15,7 +12,7 @@ class Place(Base):
         price: float,
         latitude: float,
         longitude: float,
-        owner: User,
+        owner: Base,
         description: str = "",
         amenities: list | None = None,
     ) -> None:
@@ -30,11 +27,11 @@ class Place(Base):
         self.reviews = []
         self.amenities = amenities if amenities is not None else []
 
-    def add_review(self, review: Review) -> None:
+    def add_review(self, review: Base) -> None:
         """Add review to place."""
         self.reviews.append(review)
 
-    def add_amenity(self, amenity: Amenity) -> None:
+    def add_amenity(self, amenity: Base) -> None:
         """Add amenity to place."""
         self.amenities.append(amenity)
 
@@ -109,11 +106,11 @@ class Place(Base):
         self.__longitude = float(longitude)
 
     @property
-    def owner(self) -> User:
+    def owner(self) -> Base:
         return self.__owner
 
     @owner.setter
-    def owner(self, owner_id: User) -> None:
-        if not isinstance(owner_id, User):
+    def owner(self, owner: Base) -> None:
+        if not isinstance(owner, Base):
             raise TypeError("owner must be a User instance")
-        self.__owner = owner_id
+        self.__owner = owner
