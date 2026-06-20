@@ -24,7 +24,7 @@ user_model = api.model(
     },
 )
 
-#review model
+# review model
 
 review_model = api.model(
     "PlaceReview",
@@ -123,7 +123,8 @@ class PlaceResource(Resource):
                 "email": place.owner.email,
             } if place.owner else None,
             "amenities": [
-                {"id": a.id, "name": a.name}
+                {"id": facade.get_amenity(
+                    a).id, "name": facade.get_amenity(a).name}
                 for a in getattr(place, "amenities", [])
             ],
         }, 200
@@ -156,6 +157,7 @@ class PlaceResource(Resource):
         }, 200
 
 # endpoint for reviews
+
 
 @api.route("/<place_id>/reviews")
 class PlaceReviewList(Resource):
