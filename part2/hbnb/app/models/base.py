@@ -1,17 +1,35 @@
-'''Module containing HBNB Base Class'''
+"""Module containing HBNB Base Class."""
 
 import uuid
 from datetime import datetime
 
 
 class Base:
-    '''Base Class for HBNB'''
+    """Base Class for HBNB."""
 
-    def __init__(self):
-        '''Initialise ID, Created_At and Updated_At'''
+    def __init__(self) -> None:
+        """Initialise ID, Created_At and Updated_At."""
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+
+    def save(self) -> None:
+        """Update modification timestamp."""
+        self.updated_at = datetime.now()
+
+    def update(self, data: dict) -> None:
+        """Update object attributes.
+
+        Raises:
+            TypeError: If data is not a dictionary.
+
+        """
+        if not isinstance(data, dict):
+            raise TypeError("data must be a dictionary")
+        for key, value in data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        self.save()
 
     @property
     def id(self) -> str:
@@ -19,7 +37,6 @@ class Base:
 
     @id.setter
     def id(self, value: str) -> None:
-        '''Set object UUID'''
         if not isinstance(value, str):
             raise TypeError("id must be UUIDv4 of type str")
         if len(value) != 36:
@@ -45,16 +62,3 @@ class Base:
         if not isinstance(value, datetime):
             raise TypeError("updated_at must be a datetime")
         self.__updated_at = value
-
-    def save(self) -> None:
-        '''Update modification timestamp'''
-        self.updated_at = datetime.now()
-
-    def update(self, data: dict) -> None:
-        '''Update object attributes'''
-        if not isinstance(data, dict):
-            raise TypeError("data must be a dictionary")
-        for key, value in data.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-        self.save()

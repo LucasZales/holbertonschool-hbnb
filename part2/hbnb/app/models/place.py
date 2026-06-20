@@ -1,11 +1,13 @@
-'''Module containing Place Class'''
+"""Module containing Place Class."""
 
 from app.models.base import Base
 from app.models.user import User
+from app.models.amenity import Amenity
+from app.models.review import Review
 
 
 class Place(Base):
-    '''Place model'''
+    """Place model."""
 
     def __init__(
         self,
@@ -15,8 +17,9 @@ class Place(Base):
         longitude: float,
         owner: User,
         description: str = "",
-        amenities: list = [],
-    ):
+        amenities: list | None = None,
+    ) -> None:
+        """Init for place class."""
         super().__init__()
         self.title = title
         self.description = description
@@ -25,7 +28,25 @@ class Place(Base):
         self.longitude = longitude
         self.owner = owner
         self.reviews = []
-        self._amenities = amenities if amenities is not None else []
+        self.amenities = amenities if amenities is not None else []
+
+    def add_review(self, review: Review) -> None:
+        """Add review to place."""
+        self.reviews.append(review)
+
+    def add_amenity(self, amenity: Amenity) -> None:
+        """Add amenity to place."""
+        self.amenities.append(amenity)
+
+    @property
+    def amenities(self) -> list:
+        return self.__amenities
+
+    @amenities.setter
+    def amenities(self, value: list) -> None:
+        if not isinstance(value, list):
+            raise TypeError("Amenities must be a list")
+        self.__amenities = value
 
     @property
     def title(self) -> str:
@@ -96,21 +117,3 @@ class Place(Base):
         if not isinstance(owner_id, User):
             raise TypeError("owner must be a User instance")
         self.__owner = owner_id
-
-    def add_review(self, review) -> None:
-        '''Add review to place'''
-        self.reviews.append(review)
-
-    def add_amenity(self, amenity) -> None:
-        '''Add amenity to place'''
-        self._amenities.append(amenity)
-
-    @property
-    def amenities(self):
-        return self._amenities
-
-    @amenities.setter
-    def amenities(self, value):
-        if not isinstance(value, list):
-            raise TypeError("Amenities must be a list")
-        self._amenities = value
