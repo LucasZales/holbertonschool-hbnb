@@ -1,20 +1,16 @@
-"""Module containing the hbnb amenity class."""
+"""Module containing the HBnB Amenity class."""
 
 # IMPORTS
-import uuid
-from datetime import datetime
 from app.models.base import Base
 
 
 class Amenity(Base):
-    """Amenity class for hbnb."""
+    """Amenity class for HBnB."""
 
     def __init__(self, name: str) -> None:
         """Init for Amenity class."""
-        self.id = str(uuid.uuid4())
+        super().__init__()
         self.name = name
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
 
     # GETTERS AND SETTERS
     @property

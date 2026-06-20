@@ -1,11 +1,12 @@
-"""Module containing HBNB Base Class."""
+"""Module containing the HBnB Base class."""
 
+# IMPORTS
 import uuid
 from datetime import datetime
 
 
 class Base:
-    """Base Class for HBNB."""
+    """Base class for HBnB."""
 
     def __init__(self) -> None:
         """Initialise ID, Created_At and Updated_At."""

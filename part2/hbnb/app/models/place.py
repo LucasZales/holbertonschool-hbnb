@@ -1,10 +1,11 @@
-"""Module containing Place Class."""
+"""Module containing the HBnB Place class."""
 
+# IMPORTS
 from app.models.base import Base
 
 
 class Place(Base):
-    """Place model."""
+    """Place class for HBnB."""
 
     def __init__(
         self,
@@ -16,7 +17,7 @@ class Place(Base):
         description: str = "",
         amenities: list | None = None,
     ) -> None:
-        """Init for place class."""
+        """Init for Place class."""
         super().__init__()
         self.title = title
         self.description = description

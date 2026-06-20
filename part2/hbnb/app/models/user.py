@@ -1,4 +1,4 @@
-"""Module containing hbnb User class."""
+"""Module containing the HBnB User class."""
 
 # IMPORTS
 from app.helpers.email_validator import validate_email
@@ -6,7 +6,7 @@ from app.models.base import Base
 
 
 class User(Base):
-    """User class for hbnb."""
+    """User class for HBnB."""
 
     def __init__(
         self,
