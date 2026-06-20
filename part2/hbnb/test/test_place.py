@@ -1,3 +1,5 @@
+"""Test for Place class."""
+
 import unittest
 
 from app.models.place import Place
@@ -5,8 +7,8 @@ from app.models.user import User
 from app.models.review import Review
 
 
-class test_place_class(unittest.TestCase):
-    def test_place_creation(self):
+class TestPlaceClass(unittest.TestCase):
+    def test_place_creation(self) -> None:
         owner = User(
             first_name="Alice",
             last_name="Smith",

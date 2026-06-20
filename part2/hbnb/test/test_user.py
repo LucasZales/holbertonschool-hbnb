@@ -1,11 +1,12 @@
-"""Test for user class."""
+"""Test for User class."""
 
 import unittest
+
 from app.models.user import User
 
 
-class test_user_class(unittest.TestCase):
-    def test_user_creation(self):
+class TestUserClass(unittest.TestCase):
+    def test_user_creation(self) -> None:
         user = User(
             first_name="John", last_name="Doe", email="john.doe@example.com"
         )

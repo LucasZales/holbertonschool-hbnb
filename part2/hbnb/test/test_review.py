@@ -1,4 +1,4 @@
-"""Test Review class."""
+"""Test for Review class."""
 
 import unittest
 
@@ -7,12 +7,12 @@ from app.models.place import Place
 from app.models.review import Review
 
 
-class test_review_class(unittest.TestCase):
-    def test_review_creation(self):
+class TestReviewClass(unittest.TestCase):
+    def test_review_creation(self) -> None:
         user = User(
             first_name="Ricardo",
             last_name="Lopez",
-            email="Ricardo.Lopez@example.com"
+            email="Ricardo.Lopez@example.com",
         )
 
         place = Place(
@@ -20,19 +20,14 @@ class test_review_class(unittest.TestCase):
             price=100,
             latitude=10,
             longitude=10,
-            owner=user
+            owner=user,
         )
 
-        review = Review(
-            text="Amazing Place",
-            rating=3,
-            user=user,
-            place=place
-        )
+        review = Review(text="Amazing Place", rating=3, user=user, place=place)
 
         place.add_review(review)
 
-        self.assertEqual(review.text, "Amazing Place!")
+        self.assertEqual(review.text, "Amazing Place")
         self.assertEqual(review.rating, 3)
         self.assertEqual(review.user, user)
         self.assertEqual(review.place, place)

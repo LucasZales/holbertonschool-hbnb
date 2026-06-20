@@ -1,10 +1,11 @@
-"""Test for user class."""
+"""Test for Amenity class."""
 
 import unittest
+
 from app.models.amenity import Amenity
 
 
-class test_amenity_class(unittest.TestCase):
-    def test_amenity_creation(self):
+class TestAmenityClass(unittest.TestCase):
+    def test_amenity_creation(self) -> None:
         amenity = Amenity(name="Wi-Fi")
         self.assertEqual(amenity.name, "Wi-Fi")
