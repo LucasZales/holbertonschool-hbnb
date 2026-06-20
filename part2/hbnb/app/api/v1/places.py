@@ -1,6 +1,6 @@
 """api/v1/places api endpoint."""
 
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from app.api.v1.api_models import (
     amenity_model_place as amenity_model,
