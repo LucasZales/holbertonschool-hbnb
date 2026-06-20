@@ -11,7 +11,7 @@ class Repository(ABC):
         pass
 
     @abstractmethod
-    def get_all(self):
+    def get_all(self) -> list:
         pass
 
     @abstractmethod
@@ -34,13 +34,13 @@ class InMemoryRepository(Repository):
     def add(self, obj):
         self._storage[obj.id] = obj
 
-    def get(self, obj_id):
+    def get(self, obj_id: str):
         return self._storage.get(obj_id)
 
     def get_all(self):
         return list(self._storage.values())
 
-    def update(self, obj_id, data):
+    def update(self, obj_id: str, data: dict):
         obj = self.get(obj_id)
         if obj:
             obj.update(data)
