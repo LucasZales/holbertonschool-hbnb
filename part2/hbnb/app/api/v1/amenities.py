@@ -9,10 +9,12 @@ api = Namespace("amenities", description="Amenity operations")
 
 @api.route("/")
 class AmenityList(Resource):
+    """API endpoints for creating and listing ameneities."""
+
     @api.expect(amenity_model)
     @api.response(201, "Amenity successfully created")
     @api.response(400, "Invalid input data")
-    def post(self):
+    def post(self) -> tuple:
         """Register a new amenity.
 
         Returns:
@@ -27,7 +29,7 @@ class AmenityList(Resource):
         return {"id": new_amenity.id, "name": new_amenity.name}, 201
 
     @api.response(200, "List of amenities retrieved successfully")
-    def get(self):
+    def get(self) -> tuple:
         """Retrieve a list of all amenities.
 
         Returns:
@@ -43,13 +45,15 @@ class AmenityList(Resource):
 
 @api.route("/<amenity_id>")
 class AmenityResource(Resource):
+    """API endpoints for getting and updating specific amenities."""
+
     @api.response(200, "Amenity details retrieved successfully")
     @api.response(404, "Amenity not found")
-    def get(self, amenity_id):
+    def get(self, amenity_id: str) -> tuple:
         """Get amenity details by ID.
 
-        Return:
-        Amenity details, if found.
+        Returns:
+            Amenity details, if found.
 
         """
         amenity = facade.get_amenity(amenity_id)
@@ -61,8 +65,13 @@ class AmenityResource(Resource):
     @api.response(200, "Amenity updated successfully")
     @api.response(404, "Amenity not found")
     @api.response(400, "Invalid input data")
-    def put(self, amenity_id):
-        """Update an amenity's information"""
+    def put(self, amenity_id: str) -> tuple:
+        """Update an amenity's information.
+
+        Returns:
+            Success or failure message
+
+        """
         amenity_data = api.payload
         amenity = facade.get_amenity(amenity_id)
         if not amenity:

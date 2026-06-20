@@ -2,6 +2,7 @@
 
 # IMPORTS
 from app.models.base import Base
+from app.models.user import User
 
 
 class Place(Base):
@@ -13,7 +14,7 @@ class Place(Base):
         price: float,
         latitude: float,
         longitude: float,
-        owner: Base,
+        owner: User,
         description: str = "",
         amenities: list | None = None,
     ) -> None:
@@ -107,11 +108,11 @@ class Place(Base):
         self.__longitude = float(longitude)
 
     @property
-    def owner(self) -> Base:
+    def owner(self) -> User:
         return self.__owner
 
     @owner.setter
-    def owner(self, owner: Base) -> None:
-        if not isinstance(owner, Base):
+    def owner(self, owner: User) -> None:
+        if not isinstance(owner, User):
             raise TypeError("owner must be a User instance")
         self.__owner = owner

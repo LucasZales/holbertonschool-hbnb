@@ -19,8 +19,13 @@ class PlaceList(Resource):
     @api.expect(place_model, validate=True)
     @api.response(201, "Place successfully created")
     @api.response(400, "Invalid input data")
-    def post(self):
-        """Register a new place."""
+    def post(self) -> tuple:
+        """Register a new place.
+
+        Returns:
+            Data of created place.
+
+        """
         place_data = api.payload
 
         try:
@@ -38,8 +43,13 @@ class PlaceList(Resource):
         }, 201
 
     @api.response(200, "List of places retrieved successfully")
-    def get(self):
-        """Retrieve full list of places."""
+    def get(self) -> tuple:
+        """Retrieve full list of places.
+
+        Returns:
+            A list of all places.
+
+        """
         places = facade.get_all_places()
 
         return [
@@ -59,8 +69,13 @@ class PlaceResource(Resource):
 
     @api.response(200, "Place details retrieved successfully")
     @api.response(404, "Place not found")
-    def get(self, place_id):
-        """Get place details by ID."""
+    def get(self, place_id: str) -> tuple:
+        """Get place details by ID.
+
+        Returns:
+            Detailes of place with given id.
+
+        """
         place = facade.get_place(place_id)
 
         if not place:
@@ -91,8 +106,13 @@ class PlaceResource(Resource):
     @api.response(200, "Place successfully updated")
     @api.response(404, "Place not found")
     @api.response(400, "Invalid input data")
-    def put(self, place_id):
-        """Update place data."""
+    def put(self, place_id: str) -> tuple:
+        """Update place data.
+
+        Returns:
+            Updated data of place.
+
+        """
         place_data = api.payload
 
         place = facade.get_place(place_id)
@@ -120,9 +140,15 @@ class PlaceResource(Resource):
 
 @api.route("/<place_id>/reviews")
 class PlaceReviewList(Resource):
-    def get(self, place_id):
-        """Get all reviews for a place"""
+    """API endpoint for listing rreviews of a place."""
 
+    def get(self, place_id: str) -> tuple:
+        """Get all reviews for a place.
+
+        Returns:
+            List of review for given place.
+
+        """
         reviews = facade.get_reviews_by_place(place_id)
 
         if reviews is None:

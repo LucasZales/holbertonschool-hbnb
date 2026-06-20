@@ -25,6 +25,7 @@ class User(Base):
     # GETTERS AND SETTERS
     @property
     def first_name(self) -> str:
+        """First name of user."""
         return self.__first_name
 
     @first_name.setter
@@ -39,6 +40,7 @@ class User(Base):
 
     @property
     def last_name(self) -> str:
+        """Last name of user."""
         return self.__last_name
 
     @last_name.setter
@@ -53,6 +55,7 @@ class User(Base):
 
     @property
     def email(self) -> str:
+        """Email of user."""
         return self.__email
 
     @email.setter
@@ -65,6 +68,7 @@ class User(Base):
 
     @property
     def is_admin(self) -> bool:
+        """Admin status of user."""
         return self.__is_admin
 
     @is_admin.setter

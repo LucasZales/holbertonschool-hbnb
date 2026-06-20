@@ -33,7 +33,7 @@ class HBnBFacade:
         """Retive User object by id.
 
         Returns:
-            ...
+            User object.
 
         """
         return self.user_repo.get(user_id)
@@ -66,11 +66,22 @@ class HBnBFacade:
         self.user_repo.update(user_id, user_data)
         return self.user_repo.get(user_id)
 
-    # Placeholder method for fetching a place by ID
-    def get_place(self, place_id: str):
+    def get_place(self, place_id: str) -> Place | None:
+        """Get place by id.
+
+        Returns:
+            Place with given id.
+
+        """
         return self.place_repo.get(place_id)
 
-    def create_place(self, place_data):
+    def create_place(self, place_data: dict) -> Place:
+        """Create a place and add it to the database.
+
+        Returns:
+            Created place.
+
+        """
         owner = self.user_repo.get(place_data["owner_id"])
         if not owner:
             raise ValueError("Owner not found")
@@ -116,8 +127,14 @@ class HBnBFacade:
         if amenity:
             amenity.update(amenity_data)
 
-    ### Review methods
-    def create_review(self, review_data):
+    # Review methods
+    def create_review(self, review_data: dict) -> Review:
+        """Create a review and save it to database.
+
+        Returns:
+            Created review.
+
+        """
         user = self.user_repo.get(review_data["user_id"])
         place = self.place_repo.get(review_data["place_id"])
 
@@ -131,10 +148,7 @@ class HBnBFacade:
             raise ValueError("Rating must be between 1 and 5")
 
         review = Review(
-            review_data["text"],
-            review_data["rating"],
-            user,
-            place
+            review_data["text"], review_data["rating"], user, place
         )
 
         self.review_repo.add(review)
@@ -142,13 +156,33 @@ class HBnBFacade:
 
         return review
 
-    def get_review(self, review_id):
+    def get_review(self, review_id: str) -> Review | None:
+        """Get review by id.
+
+        Returns:
+            Review with given id.
+
+        """
         return self.review_repo.get(review_id)
 
-    def get_all_reviews(self):
+    def get_all_reviews(self) -> list:
+        """Get a list of all reviews.
+
+        Returns:
+            List of all reviews
+
+        """
         return self.review_repo.get_all()
 
-    def update_review(self, review_id, review_data):
+    def update_review(
+        self, review_id: str, review_data: dict
+    ) -> Review | None:
+        """Update a review.
+
+        Returns:
+            Updated review.
+
+        """
         review = self.review_repo.get(review_id)
 
         if not review:
@@ -163,7 +197,8 @@ class HBnBFacade:
         review.save()
         return review
 
-    def delete_review(self, review_id):
+    def delete_review(self, review_id: str) -> None:
+        """Delete Review."""
         review = self.review_repo.get(review_id)
 
         if review:
@@ -172,7 +207,13 @@ class HBnBFacade:
 
         self.review_repo.delete(review_id)
 
-    def get_reviews_by_place(self, place_id):
+    def get_reviews_by_place(self, place_id: str) -> list:
+        """Get a list of reviews for a place.
+
+        Returns:
+            List of reviews for place
+
+        """
         place = self.place_repo.get(place_id)
 
         if not place:

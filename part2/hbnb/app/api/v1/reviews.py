@@ -9,9 +9,16 @@ api = Namespace("reviews", description="Review operations")
 
 @api.route("/")
 class ReviewList(Resource):
+    """API endpoints for creating and listing reviews."""
+
     @api.expect(review_model, validate=True)
-    def post(self):
-        """Create a review"""
+    def post(self) -> tuple:
+        """Create a review.
+
+        Returns:
+            Data of created review.
+
+        """
         data = api.payload
 
         try:
@@ -27,8 +34,13 @@ class ReviewList(Resource):
             "place_id": review.place.id,
         }, 201
 
-    def get(self):
-        """Get all reviews"""
+    def get(self) -> tuple:
+        """Get all reviews.
+
+        Returns:
+            List of all reviews
+
+        """
         reviews = facade.get_all_reviews()
 
         return [
@@ -45,8 +57,15 @@ class ReviewList(Resource):
 
 @api.route("/<review_id>")
 class ReviewResource(Resource):
-    def get(self, review_id):
-        """Get review by id"""
+    """API endpoints for getting, updating and deleting reviews."""
+
+    def get(self, review_id: str) -> tuple:
+        """Get review by id.
+
+        Returns:
+            Data of review with given id.
+
+        """
         review = facade.get_review(review_id)
 
         if not review:
@@ -61,8 +80,13 @@ class ReviewResource(Resource):
         }, 200
 
     @api.expect(review_model, validate=True)
-    def put(self, review_id):
-        """Update review"""
+    def put(self, review_id: str) -> tuple:
+        """Update review.
+
+        Returns:
+            Data of update review.
+
+        """
         data = api.payload
 
         review = facade.update_review(review_id, data)
@@ -72,7 +96,12 @@ class ReviewResource(Resource):
 
         return {"message": "Review updated successfully"}, 200
 
-    def delete(self, review_id):
-        """Delete review"""
+    def delete(self, review_id: str) -> tuple:
+        """Delete review.
+
+        Returns:
+            Success status.
+
+        """
         facade.delete_review(review_id)
         return {"message": "Review deleted successfully"}, 200
