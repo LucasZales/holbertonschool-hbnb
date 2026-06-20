@@ -103,7 +103,7 @@ class Place(Base):
 
     def add_amenity(self, amenity) -> None:
         '''Add amenity to place'''
-        self.amenities.append(amenity)
+        self._amenities.append(amenity)
 
     @property
     def amenities(self):
