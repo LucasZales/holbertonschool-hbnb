@@ -24,6 +24,18 @@ user_model = api.model(
     },
 )
 
+#review model
+
+review_model = api.model(
+    "PlaceReview",
+    {
+        "id": fields.String(description="Review ID"),
+        "text": fields.String(description="Text of the review"),
+        "rating": fields.Integer(description="Rating of the place"),
+        "user_id": fields.String(description="User ID"),
+    },
+)
+
 # Define the place model for input validation and documentation
 place_model = api.model(
     "Place",
@@ -142,3 +154,26 @@ class PlaceResource(Resource):
             "latitude": updated_place.latitude,
             "longitude": updated_place.longitude,
         }, 200
+
+# endpoint for reviews
+
+@api.route("/<place_id>/reviews")
+class PlaceReviewList(Resource):
+
+    def get(self, place_id):
+        """Get all reviews for a place"""
+
+        reviews = facade.get_reviews_by_place(place_id)
+
+        if reviews is None:
+            return {"error": "Place not found"}, 404
+
+        return [
+            {
+                "id": r.id,
+                "text": r.text,
+                "rating": r.rating,
+                "user_id": r.user.id,
+            }
+            for r in reviews
+        ], 200
