@@ -23,7 +23,7 @@ class AmenityList(Resource):
         amenity_data = api.payload
         try:
             new_amenity = facade.create_amenity(amenity_data)
-        except: ValueError as e:
+        except ValueError as e:
             return {'error': str(e)}, 400
         return {'id': new_amenity.id, 'name': new_amenity.name}, 201
 
@@ -70,6 +70,6 @@ class AmenityResource(Resource):
             return {'error': 'Amenity not found'}, 404
         try:
             facade.update_amenity(amenity_id, amenity_data)
-        except: ValueError as e:
+        except ValueError as e:
             return {'error': str(e)}, 400
         return {'message': 'Amenity updated successfully'}, 200
