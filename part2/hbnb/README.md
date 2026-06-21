@@ -1,31 +1,152 @@
-Document the Project Setup
+# HBnB – Part 2
 
-In the README.md file, write a brief overview of the project setup:
+## Project Description
 
-    Describe the purpose of each directory and file.
-    Include instructions on how to install dependencies and run the application.
+This project implements the business logic and REST API for a simplified Airbnb-like application (HBnB). It provides endpoints to manage users, places, reviews, and amenities using a layered architecture with Flask and Flask-RESTX.
 
+Persistence is handled using an in-memory repository.
 
+---
 
-Linux Virtual Environment:
-1. In holbertonschool-hbnb/part2/hbnb/ initialise a virtual environment with
+## Project Structure
+
+- `app/api/` – REST API endpoints (Flask-RESTX namespaces)
+- `app/models/` – Business entities (User, Place, Review, Amenity)
+- `app/services/` – Business logic layer (Facade pattern)
+- `app/persistence/` – In-memory storage implementation
+- `app/helpers/` – Utility functions (e.g., email validation)
+- `config.py` – Application configuration
+- `run.py` – Entry point to start the server
+
+---
+
+## Architecture
+
+The application follows a layered architecture:
+
+- **Presentation Layer:** Flask-RESTX API (`app/api`)
+- **Business Logic Layer:** Models and Facade (`app/services/facade.py`)
+- **Persistence Layer:** In-memory repository (`app/persistence`)
+
+The Facade pattern is used to centralize communication between layers.
+
+---
+
+## Setup Instructions
+
+### 1. Create virtual environment
+
+#### Linux / macOS
+```bash
+cd holbertonschool-hbnb/part2/hbnb
+python3 -m venv venv
+```
+
+#### Windows (PowerShell)
+```powershell
+cd holbertonschool-hbnb\part2\hbnb
 python -m venv venv
+```
 
-2. Activate the environment with
+---
+
+### 2. Activate virtual environment
+
+#### Linux / macOS
+```bash
 source venv/bin/activate
+```
 
-3. Upgrade pip
+#### Windows (PowerShell)
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+---
+
+### 3. Upgrade pip
+
+```bash
 pip install --upgrade pip
+```
 
-4. Install requirements
+---
+
+### 4. Install dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
-5. Run the app with
+---
+
+### 5. Run the application
+
+```bash
 python run.py
+```
 
-6. Testing:
-curl -X POST http://127.0.0.1:5000/api/v1/users/   -H "Content-Type: application/json"   -d '{"first_name": "John", "last_name": "Doe", "email": "test123@testemail.server.com"}'
-curl -X POST http://127.0.0.1:5000/api/v1/amenities/ -H "Content-Type: application/json" -d '{"name": "Toilet"}'
-curl -X POST http://127.0.0.1:5000/api/v1/places/ -H "Content-Type: application/json" -d '{"title": "Mi Casa", "description": "es su casa", "price": 100, "latitude": 50, "longitude": 80, "owner_id": "{owner_id}", "amenities": []}'
+The API will be available at:
 
-- curl -X POST http://127.0.0.1:5000/api/v1/reviews/ -H "Content-Type: application/json" -d '{"text": "excellent view", "rating": 4, "user_id": "user_id", "place_id": "place_id"}'
+```bash
+http://127.0.0.1:5000/api/v1/
+```
+
+---
+
+## Testing the API (curl examples)
+
+### Create a user
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/v1/users/ \
+-H "Content-Type: application/json" \
+-d '{"first_name": "John", "last_name": "Doe", "email": "test123@testemail.server.com"}'
+```
+
+---
+
+### Create an amenity
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/v1/amenities/ \
+-H "Content-Type: application/json" \
+-d '{"name": "Toilet"}'
+```
+
+---
+
+### Create a place
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/v1/places/ \
+-H "Content-Type: application/json" \
+-d '{"title": "Mi Casa", "description": "es su casa", "price": 100, "latitude": 50, "longitude": 80, "owner_id": "owner_id", "amenities": []}'
+```
+
+---
+
+### Create a review
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/v1/reviews/ \
+-H "Content-Type: application/json" \
+-d '{"text": "excellent view", "rating": 4, "user_id": "user_id", "place_id": "place_id"}'
+```
+
+---
+
+## Requirements
+
+- Python 3.x
+- Flask
+- Flask-RESTX
+
+---
+
+## Notes
+
+- Uses in-memory persistence (no database)
+- Input validation handled in models and services
+- Facade pattern used to decouple API and business logic
+```
