@@ -94,10 +94,17 @@ place_model = api.model(
         "owner_id": fields.String(
             required=True, description="ID of the owner"
         ),
+        "owner": fields.Nested(
+            user_model_full,
+            description="Owner of the place",
+        ),
         "amenities": fields.List(
-            fields.String,
-            required=True,
-            description="List of amenities IDs",
+            fields.Nested(amenity_model),
+            description="List of amenities",
+        ),
+        "reviews": fields.List(
+            fields.Nested(review_model_place),
+            description="List of reviews",
         ),
     },
 )

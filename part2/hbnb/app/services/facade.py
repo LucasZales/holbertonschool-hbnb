@@ -66,15 +66,7 @@ class HBnBFacade:
         self.user_repo.update(user_id, user_data)
         return self.user_repo.get(user_id)
 
-    def get_place(self, place_id: str) -> Place | None:
-        """Get place by id.
-
-        Returns:
-            Place with given id.
-
-        """
-        return self.place_repo.get(place_id)
-
+    # PLACE METHODS
     def create_place(self, place_data: dict) -> Place:
         """Create a place and add it to the database.
 
@@ -91,7 +83,26 @@ class HBnBFacade:
         self.place_repo.add(place)
         return place
 
-    # Amenity methods
+    def get_place(self, place_id: str) -> Place | None:
+        """Get place by id.
+
+        Returns:
+            Place with given id.
+
+        """
+        return self.place_repo.get(place_id)
+
+    def get_all_places(self) -> list:
+        return self.place_repo.get_all()
+
+    def update_place(self, place_id: str, place_data: dict) -> Place | None:
+        self.place_repo.update(place_id, place_data)
+        owner = self.user_repo.get(place_data["owner_id"])
+        if not owner:
+            return None
+        return self.place_repo.get(place_id)
+
+    # AMENITY METHODS
     def create_amenity(self, amenity_data: dict) -> Amenity:
         """Create amenity and save to database.
 

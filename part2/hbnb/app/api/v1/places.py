@@ -120,10 +120,9 @@ class PlaceResource(Resource):
         if not place:
             return {"error": "Place not found"}, 404
 
-        try:
-            updated_place = facade.update_place(place_id, place_data)
-        except ValueError as e:
-            return {"error": str(e)}, 400
+        updated_place = facade.update_place(place_id, place_data)
+        if updated_place is None:
+            return {"error": "invalid user"}, 400
 
         return {
             "id": updated_place.id,

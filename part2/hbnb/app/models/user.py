@@ -89,6 +89,8 @@ class User(Base):
     def email(self, email: str) -> None:
         if not isinstance(email, str):
             raise TypeError("email must be a string")
+        if not email.strip():
+            raise TypeError("email must not be empty")
         if not validate_email(email):
             raise ValueError("email must be valid")
         self.__email = email
