@@ -21,6 +21,33 @@ class User(Base):
         self.last_name = last_name
         self.email = email
         self.is_admin = is_admin
+        self.__places = []
+
+    def add_place(self, place: Base) -> None:
+        """Add place to Places list.
+
+        Raises:
+            TypeError: if place is not an instance of Place class.
+
+        """
+        if not isinstance(place, Base):
+            raise TypeError("place must be an instance of Place class.")
+        self.__places.append(place)
+
+    def remove_place(self, place_id: str) -> None:
+        """Remove place from places list.
+
+        Raises:
+            TypeError: if place id is not a string.
+            ValueError: if place not found in list.
+
+        """
+        if not isinstance(place_id, str):
+            raise TypeError("place_id must be a str.")
+        place = next(x for x in self.__places if x.id == place_id)
+        if not place:
+            raise ValueError("Place not found.")
+        self.__places.remove(place)
 
     # GETTERS AND SETTERS
     @property
