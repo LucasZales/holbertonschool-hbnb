@@ -9,6 +9,7 @@ from app.models.review import Review
 
 class TestPlaceClass(unittest.TestCase):
     def test_place_creation(self) -> None:
+        print("Running test_place_creation.")
         owner = User(
             first_name="Alice",
             last_name="Smith",

@@ -7,6 +7,7 @@ from app.models.user import User
 
 class TestUserClass(unittest.TestCase):
     def test_user_creation(self) -> None:
+        print("Running test_user_creation.")
         user = User(
             first_name="John", last_name="Doe", email="john.doe@example.com"
         )
