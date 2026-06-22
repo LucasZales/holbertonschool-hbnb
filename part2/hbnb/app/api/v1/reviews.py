@@ -48,8 +48,6 @@ class ReviewList(Resource):
                 "id": r.id,
                 "text": r.text,
                 "rating": r.rating,
-                "user_id": r.user.id,
-                "place_id": r.place.id,
             }
             for r in reviews
         ], 200
@@ -79,7 +77,7 @@ class ReviewResource(Resource):
             "place_id": review.place.id,
         }, 200
 
-    @api.expect(review_model, validate=True)
+    @api.expect(review_model)
     def put(self, review_id: str) -> tuple:
         """Update review.
 
@@ -103,5 +101,7 @@ class ReviewResource(Resource):
             Success status.
 
         """
+        if not facade.get_review(review_id):
+            return {"message": "Review not found"}, 404
         facade.delete_review(review_id)
         return {"message": "Review deleted successfully"}, 200

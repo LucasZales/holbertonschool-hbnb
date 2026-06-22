@@ -125,14 +125,7 @@ class PlaceResource(Resource):
         if updated_place is None:
             return {"error": "invalid user"}, 400
 
-        return {
-            "id": updated_place.id,
-            "title": updated_place.title,
-            "description": updated_place.description,
-            "price": updated_place.price,
-            "latitude": updated_place.latitude,
-            "longitude": updated_place.longitude,
-        }, 200
+        return {"message": "Place updated successfully"}, 200
 
 
 # endpoint for reviews
@@ -159,7 +152,6 @@ class PlaceReviewList(Resource):
                 "id": r.id,
                 "text": r.text,
                 "rating": r.rating,
-                "user_id": r.user.id,
             }
             for r in reviews
         ], 200

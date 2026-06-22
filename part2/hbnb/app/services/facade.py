@@ -218,7 +218,7 @@ class HBnBFacade:
 
         self.review_repo.delete(review_id)
 
-    def get_reviews_by_place(self, place_id: str) -> list:
+    def get_reviews_by_place(self, place_id: str) -> list | None:
         """Get a list of reviews for a place.
 
         Returns:
@@ -228,6 +228,6 @@ class HBnBFacade:
         place = self.place_repo.get(place_id)
 
         if not place:
-            return []
+            return None
 
         return place.reviews
