@@ -3,6 +3,7 @@
 # IMPORTS
 from app.helpers.email_validator import validate_email
 from app.models.base import Base
+from app import bcrypt
 
 
 class User(Base):
@@ -13,6 +14,7 @@ class User(Base):
         first_name: str,
         last_name: str,
         email: str,
+        password: str,
         is_admin: bool = False,
     ) -> None:
         """Init for User class."""
@@ -20,6 +22,7 @@ class User(Base):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
+        self.hash_password(password)
         self.is_admin = is_admin
         self.__places = []
 
@@ -49,6 +52,16 @@ class User(Base):
             raise ValueError("Place not found.")
         self.__places.remove(place)
 
+    def hash_password(self, password: str) -> None:
+        """Hashes the password before storing it."""
+        if not password:
+            raise ValueError("Password cannot be empty.")
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    def verify_password(self, password: str) -> bool:
+        """Verifies if the provided password matches the hashed password."""
+        return bcrypt.check_password_hash(self.password, password)
+    
     # GETTERS AND SETTERS
     @property
     def first_name(self) -> str:

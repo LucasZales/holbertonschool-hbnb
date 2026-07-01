@@ -24,6 +24,11 @@ user_model_input = api.model(
             example="john.doe@example.com",
             pattern=r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}",
         ),
+        "password": fields.String(
+            required=True,
+            description="Password of the user",
+            example="securepassword123",
+        ),
     },
 )
 user_model_full = api.inherit(
