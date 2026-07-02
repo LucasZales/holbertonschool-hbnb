@@ -5,7 +5,7 @@ from flask_restx import Namespace, fields
 api = Namespace("Models", description="Model deffinitions")
 
 # USER API MODELS
-user_model_input = api.model(
+user_model_base = api.model(
     "User_Base",
     {
         "first_name": fields.String(
@@ -24,6 +24,12 @@ user_model_input = api.model(
             example="john.doe@example.com",
             pattern=r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}",
         ),
+    },
+)
+user_model_input = api.inherit(
+    "User_Input",
+    user_model_base,
+    {
         "password": fields.String(
             required=True,
             description="Password of the user",
@@ -33,7 +39,7 @@ user_model_input = api.model(
 )
 user_model_full = api.inherit(
     "User_Full",
-    user_model_input,
+    user_model_base,
     {
         "id": fields.String(
             required=False,
