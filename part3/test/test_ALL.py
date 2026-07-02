@@ -3,6 +3,7 @@
 import unittest
 from werkzeug.test import TestResponse
 from app import create_app
+from pprint import pprint
 
 
 def check_response(
@@ -34,32 +35,38 @@ class TestALL(unittest.TestCase):
             "first_name": "John",
             "last_name": "Doe",
             "email": "john.doe@example.com",
+            "password": "password",
         }
         user_two_init = {
             "first_name": "Jane",
             "last_name": "Doe",
             "email": "jake.doe@example.com",
+            "password": "secure",
         }
         user_two_update = {
             "first_name": "Jane",
             "last_name": "Doe",
             "email": "jane.doe@example.com",
+            "password": "new_password",
         }
         user_null_update = {
             "first_name": "Jane",
             "last_name": "Doe",
             "email": "jane.doe@example.com",
+            "password": "pass",
         }
         user_bad_init = {
             "first_name": "",
             "last_name": "",
             "email": "invalid-email",
+            "password": "passad",
         }
 
         user_repeat_init = {
             "first_name": "Jane",
             "last_name": "Doe",
             "email": "jake.doe@example.com",
+            "password": "passed",
         }
 
         user_one_json = check_response(
@@ -643,10 +650,12 @@ class TestALL(unittest.TestCase):
         # --GET USER DETAILS BY VALID ID
         user_one_details_expected = user_one_init.copy()
         user_one_details_expected["id"] = user_one_id
+        del user_one_details_expected["password"]
         self.assertEqual(user_one_details, user_one_details_expected)
 
         user_two_details_expected = user_two_update.copy()
         user_two_details_expected["id"] = user_two_id
+        del user_two_details_expected["password"]
         self.assertEqual(user_two_details, user_two_details_expected)
 
         # --GET USER DETAILS BY INVALID ID
