@@ -53,15 +53,25 @@ class User(Base):
         self.__places.remove(place)
 
     def hash_password(self, password: str) -> None:
-        """Hashes the password before storing it."""
+        """Hashes the password before storing it.
+
+        Raises:
+            ValueError: if password is an empty string.
+
+        """
         if not password:
             raise ValueError("Password cannot be empty.")
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+        self.password = bcrypt.generate_password_hash(password).decode("utf-8")
 
     def verify_password(self, password: str) -> bool:
-        """Verifies if the provided password matches the hashed password."""
+        """Verify if the provided password matches the hashed password.
+
+        Returns:
+            True if hash of password matches stored hash
+
+        """
         return bcrypt.check_password_hash(self.password, password)
-    
+
     # GETTERS AND SETTERS
     @property
     def first_name(self) -> str:
