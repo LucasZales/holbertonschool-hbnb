@@ -12,7 +12,9 @@ def check_response(
     expected_status: str,
 ) -> dict | None:
     if response.status != expected_status:
-        print(response.json)
+        print("\n#########\nresponse")
+        pprint(response.json)
+        print("#########")
     self.assertEqual(response.status, expected_status)
     return response.json
 
@@ -31,23 +33,26 @@ class TestALL(unittest.TestCase):
         headers = {"Content-Type": "application/json"}
 
         # USERS API TESTS
+        user_one_pass = "upassone"
+        user_two_pass = "upasstwo"
+        user_two_update_pass = "upassupdate"
         user_one_init = {
             "first_name": "John",
             "last_name": "Doe",
             "email": "john.doe@example.com",
-            "password": "password",
+            "password": user_one_pass,
         }
         user_two_init = {
             "first_name": "Jane",
             "last_name": "Doe",
             "email": "jake.doe@example.com",
-            "password": "secure",
+            "password": user_two_pass,
         }
         user_two_update = {
             "first_name": "Jane",
             "last_name": "Doe",
             "email": "jane.doe@example.com",
-            "password": "new_password",
+            "password": user_two_update_pass,
         }
         user_null_update = {
             "first_name": "Jane",
@@ -62,12 +67,7 @@ class TestALL(unittest.TestCase):
             "password": "passad",
         }
 
-        user_repeat_init = {
-            "first_name": "Jane",
-            "last_name": "Doe",
-            "email": "jake.doe@example.com",
-            "password": "passed",
-        }
+        user_repeat_init = user_one_init.copy()
 
         user_one_json = check_response(
             self,
@@ -614,6 +614,119 @@ class TestALL(unittest.TestCase):
             "404 NOT FOUND",
         )
 
+        # LOGIN API TESTS
+        login_one_init = {
+            "email": user_one_init["email"],
+            "password": user_one_init["password"],
+        }
+
+        login_badpass_init = {
+            "email": user_one_init["email"],
+            "password": "weegwerr",
+        }
+
+        login_baddata_init = {
+            "email": "john.doe@example.com",
+            "password": 4,
+        }
+
+        login_null_init = {
+            "email": "dragons@here.be",
+            "password": "pass",
+        }
+
+        login_one_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_one_init,
+                headers=headers,
+            ),
+            "200 OK",
+        )
+
+        login_badpass_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_badpass_init,
+                headers=headers,
+            ),
+            "401 UNAUTHORIZED",
+        )
+
+        login_baddata_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_baddata_init,
+                headers=headers,
+            ),
+            "400 BAD REQUEST",
+        )
+        login_null_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_null_init,
+                headers=headers,
+            ),
+            "401 UNAUTHORIZED",
+        )
+
+        if login_one_json is None:
+            raise ValueError("err: login_one_json is None")
+        if login_badpass_json is None:
+            raise ValueError("err: login_badpass_json is None")
+        if login_baddata_json is None:
+            raise ValueError("err: login_baddata_json is None")
+        if login_null_json is None:
+            raise ValueError("err: login_null_json is None")
+        login_one_jwt = login_one_json["access_token"]
+        login_invalid_jwt = "\
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVC\
+J9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc4\
+MzA4OTc0MiwianRpIjoiNGRjZjEwYzktMjg4\
+ZC00MjgyLTliZDktYzY0YzkyN2JiODVmIiwid\
+HlwZSI6ImFjY2VzcyIsInN1YiI6IjU3MWYzMGM\
+3LWFmMWUtNDViYy04ZTgzLTE4YmNhY2YyY2YwYS\
+IsIm5iZiI6MTc4MzA4OTc0MiwiY3NyZiI6IjJiZG\
+ZjODRjLTZmYWUtNGFlYi1iNjNhLWFjZTcwNjE2ZDc\
+1MiIsImV4cCI6MTc4MzA5MDY0MiwiaXNfYWRtaW4iO\
+mZhbHNlfQ.PfM4uyCss9OzIWTGtbsOH9-eGgxOC97rZf0jQB8-g3k"
+        # ACCESS PROTECTED ROUTES
+        protected_one_headers = {"Authorization": f"Bearer {login_one_jwt}"}
+
+        protected_invalid_headers = {
+            "Authorization": f"Bearer {login_invalid_jwt}"
+        }
+
+        protected_one_json = check_response(
+            self,
+            self.client.get(
+                f"{url}/auth/protected",
+                headers=protected_one_headers,
+            ),
+            "200 OK",
+        )
+
+        protected_invalid_json = check_response(
+            self,
+            self.client.get(
+                f"{url}/auth/protected",
+                headers=protected_invalid_headers,
+            ),
+            "422 UNPROCESSABLE ENTITY",
+        )
+
+        protected_null_json = check_response(
+            self,
+            self.client.get(
+                f"{url}/auth/protected",
+            ),
+            "401 UNAUTHORIZED",
+        )
+
         # RESPONSE DATA TESTS
 
         # USER RESPONSE TESTS
@@ -859,3 +972,35 @@ class TestALL(unittest.TestCase):
             reviewlist_pre, [review_one_list_details, review_two_list_details]
         )
         self.assertEqual(reviewlist_post, [review_one_list_details])
+
+        # LOGIN RESPONSE TESTS
+        # -POST /api/v1/auth/login/
+        # --VALID LOGIN
+        self.assertTrue("access_token" in login_one_json.keys())
+
+        # --INVALID LOGIN
+        login_badpass_expected = {"error": "Invalid credentials"}
+        self.assertEqual(login_badpass_json, login_badpass_expected)
+
+        login_baddata_expected = {
+            "errors": {"password": "4 is not of type 'string'"},
+            "message": "Input payload validation failed",
+        }
+        self.assertEqual(login_baddata_json, login_baddata_expected)
+
+        login_null_expected = {"error": "Invalid credentials"}
+        self.assertEqual(login_null_json, login_null_expected)
+
+        # PROTECTED RESPONSE TESTS
+        # -GET /api/v1/auth/protected
+        # --VALID ACCESS
+        protected_one_expected = {"message": f"Hello, user {user_one_id}"}
+        self.assertEqual(protected_one_json, protected_one_expected)
+
+        # --INVALID ACCESS
+
+        protected_invalid_expected = {"msg": "Signature verification failed"}
+        self.assertEqual(protected_invalid_json, protected_invalid_expected)
+
+        protected_null_expected = {"msg": "Missing Authorization Header"}
+        self.assertEqual(protected_null_json, protected_null_expected)
