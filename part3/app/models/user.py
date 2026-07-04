@@ -2,7 +2,7 @@
 
 # IMPORTS
 from app.helpers.email_validator import validate_email
-from app.models.base import BaseModel
+from app.models.baseclass import BaseModel
 from app import bcrypt
 
 

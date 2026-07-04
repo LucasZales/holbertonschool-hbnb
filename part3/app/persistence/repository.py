@@ -1,7 +1,7 @@
 """Module containing the InMemoryRepository for HBnB."""
 
 from abc import ABC, abstractmethod
-from app.models.base import BaseModel
+from app.models.baseclass import BaseModel
 
 
 class Repository[BaseType: BaseModel](ABC):

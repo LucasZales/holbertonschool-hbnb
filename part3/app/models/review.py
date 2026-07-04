@@ -1,7 +1,7 @@
 """Module containing the HBnB Review class."""
 
 # IMPORTS
-from app.models.base import BaseModel
+from app.models.baseclass import BaseModel
 
 
 class Review(BaseModel):

@@ -1,7 +1,7 @@
 """Module containing the HBnB Amenity class."""
 
 # IMPORTS
-from app.models.base import BaseModel
+from app.models.baseclass import BaseModel
 
 
 class Amenity(BaseModel):
