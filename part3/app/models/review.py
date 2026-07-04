@@ -1,14 +1,14 @@
 """Module containing the HBnB Review class."""
 
 # IMPORTS
-from app.models.base import Base
+from app.models.base import BaseModel
 
 
-class Review(Base):
+class Review(BaseModel):
     """Review class for HBnB."""
 
     def __init__(
-        self, text: str, rating: int, user: Base, place: Base
+        self, text: str, rating: int, user: BaseModel, place: BaseModel
     ) -> None:
         """Init for Review class."""
         super().__init__()
@@ -42,21 +42,21 @@ class Review(Base):
         self.__rating = rating
 
     @property
-    def user(self) -> Base:
+    def user(self) -> BaseModel:
         return self.__user
 
     @user.setter
-    def user(self, user: Base) -> None:
-        if not isinstance(user, Base):
+    def user(self, user: BaseModel) -> None:
+        if not isinstance(user, BaseModel):
             raise TypeError("user must be a User instance")
         self.__user = user
 
     @property
-    def place(self) -> Base:
+    def place(self) -> BaseModel:
         return self.__place
 
     @place.setter
-    def place(self, place: Base) -> None:
-        if not isinstance(place, Base):
+    def place(self, place: BaseModel) -> None:
+        if not isinstance(place, BaseModel):
             raise TypeError("place must be a Place instance")
         self.__place = place

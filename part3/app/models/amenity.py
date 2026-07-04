@@ -1,10 +1,10 @@
 """Module containing the HBnB Amenity class."""
 
 # IMPORTS
-from app.models.base import Base
+from app.models.base import BaseModel
 
 
-class Amenity(Base):
+class Amenity(BaseModel):
     """Amenity class for HBnB."""
 
     def __init__(self, name: str) -> None:

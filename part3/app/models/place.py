@@ -1,11 +1,11 @@
 """Module containing the HBnB Place class."""
 
 # IMPORTS
-from app.models.base import Base
+from app.models.base import BaseModel
 from app.models.user import User
 
 
-class Place(Base):
+class Place(BaseModel):
     """Place class for HBnB."""
 
     def __init__(
@@ -29,11 +29,11 @@ class Place(Base):
         self.reviews = []
         self.amenities = amenities if amenities is not None else []
 
-    def add_review(self, review: Base) -> None:
+    def add_review(self, review: BaseModel) -> None:
         """Add review to place."""
         self.reviews.append(review)
 
-    def add_amenity(self, amenity: Base) -> None:
+    def add_amenity(self, amenity: BaseModel) -> None:
         """Add amenity to place."""
         self.amenities.append(amenity)
 

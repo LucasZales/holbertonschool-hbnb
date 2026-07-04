@@ -1,10 +1,10 @@
 """Module containing the InMemoryRepository for HBnB."""
 
 from abc import ABC, abstractmethod
-from app.models.base import Base
+from app.models.base import BaseModel
 
 
-class Repository[BaseType: Base](ABC):
+class Repository[BaseType: BaseModel](ABC):
     """Base class for in memory repository."""
 
     @abstractmethod
@@ -34,7 +34,7 @@ class Repository[BaseType: Base](ABC):
         pass
 
 
-class InMemoryRepository[BaseType: Base](Repository):
+class InMemoryRepository[BaseType: BaseModel](Repository):
     """InMemoryRepository class for HBnB."""
 
     def __init__(self) -> None:

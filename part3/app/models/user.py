@@ -2,11 +2,11 @@
 
 # IMPORTS
 from app.helpers.email_validator import validate_email
-from app.models.base import Base
+from app.models.base import BaseModel
 from app import bcrypt
 
 
-class User(Base):
+class User(BaseModel):
     """User class for HBnB."""
 
     def __init__(
@@ -26,14 +26,14 @@ class User(Base):
         self.is_admin = is_admin
         self.__places = []
 
-    def add_place(self, place: Base) -> None:
+    def add_place(self, place: BaseModel) -> None:
         """Add place to Places list.
 
         Raises:
             TypeError: if place is not an instance of Place class.
 
         """
-        if not isinstance(place, Base):
+        if not isinstance(place, BaseModel):
             raise TypeError("place must be an instance of Place class.")
         self.__places.append(place)
 
