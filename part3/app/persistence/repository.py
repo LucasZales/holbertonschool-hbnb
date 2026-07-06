@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from app.models.baseclass import BaseModel
+from app import db
 
 
 class Repository[BaseType: BaseModel](ABC):
@@ -91,3 +92,60 @@ class InMemoryRepository[BaseType: BaseModel](Repository):
             ),
             None,
         )
+
+
+class SQLAlchemyRepository[BaseType: BaseModel](Repository):
+    """Database repository class for HBnB."""
+
+    def __init__(self, model: BaseType) -> None:
+        """Init for SQLAlchemyRepository."""
+        self.model = model
+
+    def add(self, obj: BaseType) -> None:
+        """Add object to repo under key 'id'."""
+        db.session.add(obj)
+        db.session.commit()
+
+    def get(self, obj_id: str) -> BaseType | None:
+        """Get and object by its id.
+
+        Returns:
+            Object with the given id.
+
+        """
+        return self.model.query.get(obj_id)
+
+    def get_all(self) -> list:
+        """Get all objects in the ropo.
+
+        Returns:
+            list of all objects in the repo
+
+        """
+        return self.model.query.all()
+
+    def update(self, obj_id: str, data: dict) -> None:
+        """Update and object in the repo."""
+        obj = self.get(obj_id)
+        if obj:
+            for key, value in data.items():
+                setattr(obj, key, value)
+            db.session.commit()
+
+    def delete(self, obj_id: str) -> None:
+        """Delete an object from the repo."""
+        obj = self.get(obj_id)
+        if obj:
+            db.session.delete(obj)
+            db.session.commit()
+
+    def get_by_attribute(
+        self, attr_name: str, attr_value: object
+    ) -> BaseType | None:
+        """Get and object by an antribute.
+
+        Returns:
+            Object with the attibute value pair or none
+
+        """
+        return self.model.query.filter_by(**{attr_name: attr_value}).first()

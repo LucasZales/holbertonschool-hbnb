@@ -3,11 +3,21 @@
 # IMPORTS
 from app.helpers.email_validator import validate_email
 from app.models.baseclass import BaseModel
-from app import bcrypt
+from app import bcrypt, db
+from sqlalchemy.orm import validates
 
 
 class User(BaseModel):
     """User class for HBnB."""
+
+    __tablename__ = "users"
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
+    places = db.relationship("Place", backref="owner", lazy=True)
 
     def __init__(
         self,
@@ -61,7 +71,25 @@ class User(BaseModel):
         """
         if not password:
             raise ValueError("Password cannot be empty.")
-        self.password = bcrypt.generate_password_hash(password).decode("utf-8")
+        self.password = password
+
+    @validates("password")
+    def validate_password(self, _key: str, password: str) -> str:
+        """Validate password.
+
+        Returns:
+            password if all checks pass
+
+        Raises:
+            TypeError: if password is not a string.
+            ValueError: if password is empty
+
+        """
+        if not isinstance(password, str):
+            raise TypeError("Password must be a string")
+        if not password.strip():
+            raise ValueError("Password cannot be empty.")
+        return bcrypt.generate_password_hash(password).decode("utf-8")
 
     def verify_password(self, password: str) -> bool:
         """Verify if the provided password matches the hashed password.
@@ -72,59 +100,78 @@ class User(BaseModel):
         """
         return bcrypt.check_password_hash(self.password, password)
 
-    # GETTERS AND SETTERS
-    @property
-    def first_name(self) -> str:
-        """First name of user."""
-        return self.__first_name
+    # VALIDATERS
+    @validates("first_name")
+    def validate_first_name(self, _key: str, first_name: str) -> str:
+        """Validate first_name.
 
-    @first_name.setter
-    def first_name(self, first_name: str) -> None:
+        Returns:
+            first_name if all checks pass
+
+        Raises:
+            TypeError: if first_name is not a string.
+            ValueError: if first_name is empty
+
+        """
         if not isinstance(first_name, str):
             raise TypeError("first name must be a string")
         if first_name == "":
             raise ValueError("first name cannot be empty")
         if len(first_name) > 50:
             raise ValueError("first name must be no longer then 50 characters")
-        self.__first_name = first_name
+        return first_name
 
-    @property
-    def last_name(self) -> str:
-        """Last name of user."""
-        return self.__last_name
+    @validates("last_name")
+    def validate_last_name(self, _key: str, last_name: str) -> str:
+        """Validate last_name.
 
-    @last_name.setter
-    def last_name(self, last_name: str) -> None:
+        Returns:
+            last_name if all checks pass
+
+        Raises:
+            TypeError: if last_name is not a string.
+            ValueError: if last_name is empty
+
+        """
         if not isinstance(last_name, str):
             raise TypeError("last name must be a string")
         if last_name == "":
             raise ValueError("last name cannot be empty")
         if len(last_name) > 50:
             raise ValueError("last name must be no longer then 50 characters")
-        self.__last_name = last_name
+        return last_name
 
-    @property
-    def email(self) -> str:
-        """Email of user."""
-        return self.__email
+    @validates("email")
+    def validate_email(self, _key: str, email: str) -> str:
+        """Validate email.
 
-    @email.setter
-    def email(self, email: str) -> None:
+        Returns:
+            email if all checks pass
+
+        Raises:
+            TypeError: if email is not a string.
+            ValueError: if email is empty
+
+        """
         if not isinstance(email, str):
             raise TypeError("email must be a string")
         if not email.strip():
             raise TypeError("email must not be empty")
         if not validate_email(email):
             raise ValueError("email must be valid")
-        self.__email = email
+        return email
 
-    @property
-    def is_admin(self) -> bool:
-        """Admin status of user."""
-        return self.__is_admin
+    @validates("is_admin")
+    def validate_is_admin(self, _key: str, is_admin: bool) -> bool:
+        """Validate is_admin.
 
-    @is_admin.setter
-    def is_admin(self, is_admin: bool) -> None:
+        Returns:
+            is_admin if all checks pass
+
+        Raises:
+            TypeError: if is_admin is not a bool.
+
+        """
         if not isinstance(is_admin, bool):
             raise TypeError("is_admin must be bool")
-        self.__is_admin = is_admin
+        return is_admin

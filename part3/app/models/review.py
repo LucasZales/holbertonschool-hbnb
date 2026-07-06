@@ -2,61 +2,97 @@
 
 # IMPORTS
 from app.models.baseclass import BaseModel
+from app import db
+from sqlalchemy.orm import validates
 
 
 class Review(BaseModel):
     """Review class for HBnB."""
 
+    __tablename__ = "reviews"
+    text = db.Column(db.String, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+
+    place_id = db.Column(db.String, db.ForeignKey("places.id"), nullable=False)
+    user_id = db.Column(db.String, db.ForeignKey("users.id"), nullable=False)
+
     def __init__(
-        self, text: str, rating: int, user: BaseModel, place: BaseModel
+        self,
+        text: str,
+        rating: int,
+        user: BaseModel,
+        place: BaseModel,
     ) -> None:
         """Init for Review class."""
         super().__init__()
         self.text = text
         self.rating = rating
-        self.user = user
-        self.place = place
+        self.user_id = user.id
+        self.place_id = place.id
 
-    @property
-    def text(self) -> str:
-        return self.__text
+    # VALIDATERS
+    @validates("text")
+    def validate_text(self, _key: str, text: str) -> str:
+        """Validate text.
 
-    @text.setter
-    def text(self, text: str) -> None:
+        Returns:
+            text if all checks pass
+
+        Raises:
+            TypeError: if text is not a string.
+            ValueError: if text is empty
+
+        """
         if not isinstance(text, str):
             raise TypeError("text must be a string")
         if not text.strip():
             raise ValueError("text cannot be empty")
-        self.__text = text
+        return text
 
-    @property
-    def rating(self) -> int:
-        return self.__rating
+    @validates("rating")
+    def validate_rating(self, _key: str, rating: int) -> int:
+        """Validate rating.
 
-    @rating.setter
-    def rating(self, rating: int) -> None:
+        Returns:
+            rating if all checks pass
+
+        Raises:
+            TypeError: if rating is not an int.
+            ValueError: if rating is not between 1 and 5
+
+        """
         if not isinstance(rating, int):
             raise TypeError("rating must be an integer")
         if rating < 1 or rating > 5:
             raise ValueError("rating must be between 1 and 5")
-        self.__rating = rating
+        return rating
 
-    @property
-    def user(self) -> BaseModel:
-        return self.__user
+    @validates("place")
+    def validate_place(self, _key: str, place: BaseModel) -> BaseModel:
+        """Validate place.
 
-    @user.setter
-    def user(self, user: BaseModel) -> None:
-        if not isinstance(user, BaseModel):
-            raise TypeError("user must be a User instance")
-        self.__user = user
+        Returns:
+            place if all checks pass
 
-    @property
-    def place(self) -> BaseModel:
-        return self.__place
+        Raises:
+            TypeError: if place is not an instance of the place class.
 
-    @place.setter
-    def place(self, place: BaseModel) -> None:
+        """
         if not isinstance(place, BaseModel):
             raise TypeError("place must be a Place instance")
-        self.__place = place
+        return place
+
+    @validates("user")
+    def validate_user(self, _key: str, user: BaseModel) -> BaseModel:
+        """Validate user.
+
+        Returns:
+            user if all checks pass
+
+        Raises:
+            TypeError: if user is not an instance of user class.
+
+        """
+        if not isinstance(user, BaseModel):
+            raise TypeError("user must be a User instance")
+        return user
