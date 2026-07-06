@@ -14,6 +14,7 @@ class TestReviewClass(unittest.TestCase):
             first_name="Ricardo",
             last_name="Lopez",
             email="Ricardo.Lopez@example.com",
+            password="password!",
         )
 
         place = Place(
@@ -25,11 +26,10 @@ class TestReviewClass(unittest.TestCase):
         )
 
         review = Review(text="Amazing Place", rating=3, user=user, place=place)
-
         place.add_review(review)
 
         self.assertEqual(review.text, "Amazing Place")
         self.assertEqual(review.rating, 3)
-        self.assertEqual(review.user, user)
-        self.assertEqual(review.place, place)
+        self.assertEqual(review.user_id, user.id)
+        self.assertEqual(review.place_id, place.id)
         self.assertEqual(len(place.reviews), 1)

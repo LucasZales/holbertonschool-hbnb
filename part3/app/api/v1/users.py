@@ -2,6 +2,7 @@
 
 from flask_restx import Namespace, Resource
 from app.services import facade
+from app.exception.notfound import NotFoundError
 from app.api.v1.api_models import user_model_full, user_model_input
 
 # Any use of @api.response(<status code>, <string>)
@@ -34,7 +35,11 @@ class UserList(Resource):
         user_data = api.payload
 
         # Simulate email uniqueness check (to be replaced by real validation with persistence)
-        existing_user = facade.get_user_by_email(user_data["email"])
+        try:
+            existing_user = facade.get_user_by_email(user_data["email"])
+        except NotFoundError:
+            existing_user = None
+
         if existing_user:
             return {"error": "Email already registered"}, 400
 
@@ -66,10 +71,12 @@ class UserResource(Resource):
             The details of the user with given id.
 
         """
-        user = facade.get_user(user_id)
-
-        if not user:
-            return {"error": "User not found"}, 404
+        try:
+            user = facade.get_user(user_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
+        except ValueError as e:
+            return {"error": str(e)}, 400
 
         return api.marshal(user, user_model_full), 200
 
@@ -86,9 +93,11 @@ class UserResource(Resource):
 
         """
         user_data = api.payload
-        user = facade.update_user(user_id, user_data)
-
-        if not user:
-            return {"error": "User not found"}, 404
+        try:
+            user = facade.update_user(user_id, user_data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
+        except ValueError as e:
+            return {"error": str(e)}, 400
 
         return api.marshal(user, user_model_full), 200

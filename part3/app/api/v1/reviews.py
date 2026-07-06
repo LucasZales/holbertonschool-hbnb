@@ -2,7 +2,11 @@
 
 from flask_restx import Namespace, Resource
 from app.services import facade
-from app.api.v1.api_models import review_model_creation as review_model
+from app.exception.notfound import NotFoundError
+from app.api.v1.api_models import (
+    review_model_full,
+    review_model_creation as review_model,
+)
 
 api = Namespace("reviews", description="Review operations")
 
@@ -23,16 +27,12 @@ class ReviewList(Resource):
 
         try:
             review = facade.create_review(data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
         except ValueError as e:
             return {"error": str(e)}, 400
 
-        return {
-            "id": review.id,
-            "text": review.text,
-            "rating": review.rating,
-            "user_id": review.user.id,
-            "place_id": review.place.id,
-        }, 201
+        return api.marshal(review, review_model_full), 201
 
     def get(self) -> tuple:
         """Get all reviews.
@@ -43,14 +43,9 @@ class ReviewList(Resource):
         """
         reviews = facade.get_all_reviews()
 
-        return [
-            {
-                "id": r.id,
-                "text": r.text,
-                "rating": r.rating,
-            }
-            for r in reviews
-        ], 200
+        return api.marshal(
+            reviews, review_model_full, mask="{id, text, rating}"
+        ), 200
 
 
 @api.route("/<review_id>")
@@ -64,18 +59,12 @@ class ReviewResource(Resource):
             Data of review with given id.
 
         """
-        review = facade.get_review(review_id)
+        try:
+            review = facade.get_review(review_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
-        if not review:
-            return {"error": "Review not found"}, 404
-
-        return {
-            "id": review.id,
-            "text": review.text,
-            "rating": review.rating,
-            "user_id": review.user.id,
-            "place_id": review.place.id,
-        }, 200
+        return api.marshal(review, review_model_full), 200
 
     @api.expect(review_model)
     def put(self, review_id: str) -> tuple:
@@ -87,10 +76,10 @@ class ReviewResource(Resource):
         """
         data = api.payload
 
-        review = facade.update_review(review_id, data)
-
-        if not review:
-            return {"error": "Review not found"}, 404
+        try:
+            facade.update_review(review_id, data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
         return {"message": "Review updated successfully"}, 200
 
@@ -101,7 +90,8 @@ class ReviewResource(Resource):
             Success status.
 
         """
-        if not facade.get_review(review_id):
-            return {"message": "Review not found"}, 404
-        facade.delete_review(review_id)
+        try:
+            facade.delete_review(review_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
         return {"message": "Review deleted successfully"}, 200

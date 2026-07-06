@@ -2,10 +2,12 @@ from flask import Flask
 from flask_restx import Api
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from flask_sqlalchemy import SQLAlchemy
 import config
 
 jwt = JWTManager()
 bcrypt = Bcrypt()
+db = SQLAlchemy()
 
 
 def create_app(
@@ -21,7 +23,11 @@ def create_app(
     app = Flask(__name__)
     app.config.from_object(config_class)
     bcrypt.init_app(app)
+<<<<<<< HEAD
     jwt.init_app(app)
+=======
+    db.init_app(app)
+>>>>>>> task6/database
 
     api = Api(
         app,
