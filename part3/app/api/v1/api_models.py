@@ -119,3 +119,11 @@ place_model = api.model(
         ),
     },
 )
+# LOGIN MODEL
+login_model = api.model(
+    "Login",
+    {
+        "email": fields.String(required=True, description="User email"),
+        "password": fields.String(required=True, description="User password"),
+    },
+)
