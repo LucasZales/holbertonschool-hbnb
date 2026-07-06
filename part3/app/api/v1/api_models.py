@@ -75,8 +75,17 @@ review_model_base = api.model(
 )
 review_model_creation = api.inherit(
     "Review_creation",
+    review_model_base,
     {
         "place_id": fields.String(required=True, description="Place ID"),
+    },
+)
+review_model_full = api.inherit(
+    "Review_full",
+    review_model_base,
+    {
+        "place_id": fields.String(required=True, description="Place ID"),
+        "id": fields.String(description="Review ID"),
     },
 )
 review_model_place = api.inherit(
@@ -88,8 +97,8 @@ review_model_place = api.inherit(
 )
 
 # PLACE API MODELS
-place_model = api.model(
-    "Place",
+place_model_base = api.model(
+    "Place_model_base",
     {
         "title": fields.String(
             required=True, description="Title of the place"
@@ -105,6 +114,12 @@ place_model = api.model(
         "owner_id": fields.String(
             required=True, description="ID of the owner"
         ),
+    },
+)
+place_model = api.inherit(
+    "Place_model",
+    place_model_base,
+    {
         "owner": fields.Nested(
             user_model_full,
             description="Owner of the place",
@@ -116,6 +131,28 @@ place_model = api.model(
         "reviews": fields.List(
             fields.Nested(review_model_place),
             description="List of reviews",
+        ),
+    },
+)
+place_model_full = api.inherit(
+    "Place_model_full",
+    place_model,
+    {
+        "id": fields.String(
+            required=False,
+            description="id of the place",
+            example="1e408ff9-e4c3-4a31-9058-089a94494c99",
+        ),
+    },
+)
+place_model_return = api.inherit(
+    "Place_model_return",
+    place_model_base,
+    {
+        "id": fields.String(
+            required=False,
+            description="id of the place",
+            example="1e408ff9-e4c3-4a31-9058-089a94494c99",
         ),
     },
 )
