@@ -14,6 +14,7 @@ class TestPlaceClass(unittest.TestCase):
             first_name="Alice",
             last_name="Smith",
             email="alice.smith@example.com",
+            password="password!",
         )
         place = Place(
             title="Cozy Apartment",

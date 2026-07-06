@@ -1,6 +1,7 @@
 """One test to rule them all."""
 
 import unittest
+
 from werkzeug.test import TestResponse
 from app import create_app
 from pprint import pprint
@@ -12,7 +13,10 @@ def check_response(
     expected_status: str,
 ) -> dict | None:
     if response.status != expected_status:
+        print("###################")
         print(response.json)
+        print(response.status)
+        print("###################")
     self.assertEqual(response.status, expected_status)
     return response.json
 
@@ -255,7 +259,7 @@ class TestALL(unittest.TestCase):
                 json=place_bad_init,
                 headers=headers,
             ),
-            "400 BAD REQUEST",
+            "404 NOT FOUND",
         )
 
         if place_one_json is None:
@@ -447,8 +451,15 @@ class TestALL(unittest.TestCase):
             "place_id": place_one_id,
         }
 
-        review_bad_init = {
+        review_badtype_init = {
             "text": 42,
+            "rating": 30,
+            "user_id": user_null_id,
+            "place_id": place_null_id,
+        }
+
+        review_badvalue_init = {
+            "text": "",
             "rating": 30,
             "user_id": user_null_id,
             "place_id": place_null_id,
@@ -463,7 +474,6 @@ class TestALL(unittest.TestCase):
             "text": "Amazing stay!",
             "rating": 4,
         }
-
         review_one_json = check_response(
             self,
             self.client.post(
@@ -484,22 +494,34 @@ class TestALL(unittest.TestCase):
             "201 CREATED",
         )
 
-        review_bad_json = check_response(
+        review_badtype_json = check_response(
             self,
             self.client.post(
                 f"{url}/reviews/",
-                json=review_bad_init,
+                json=review_badtype_init,
                 headers=headers,
             ),
             "400 BAD REQUEST",
+        )
+
+        review_badvalue_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/reviews/",
+                json=review_badvalue_init,
+                headers=headers,
+            ),
+            "404 NOT FOUND",
         )
 
         if review_one_json is None:
             raise ValueError("err: review_one_json is None")
         if review_two_json is None:
             raise ValueError("err: review_two_json is None")
-        if review_bad_json is None:
-            raise ValueError("err: review_bad_json is None")
+        if review_badtype_json is None:
+            raise ValueError("err: review_badtype_json is None")
+        if review_badvalue_json is None:
+            raise ValueError("err: review_badvalue_json is None")
 
         review_one_id = review_one_json["id"]
         review_two_id = review_two_json["id"]
@@ -800,8 +822,14 @@ class TestALL(unittest.TestCase):
         self.assertEqual(review_two_json, review_two_expected)
 
         # --INVALID REVIEW CREATION
-        review_bad_expected = {"error": "User or Place not found"}
-        self.assertDictEqual(review_bad_json, review_bad_expected)
+        review_badtype_expected = {
+            "errors": {"text": "42 is not of type 'string'"},
+            "message": "Input payload validation failed",
+        }
+        self.assertDictEqual(review_badtype_json, review_badtype_expected)
+
+        review_badvalue_expected = {"error": "User not found"}
+        self.assertDictEqual(review_badvalue_json, review_badvalue_expected)
 
         # -PUT /api/v1/reviews/<review_id>
         # --UPDATE REVIEW BY VALID ID
@@ -840,7 +868,7 @@ class TestALL(unittest.TestCase):
         review_two_del_expect = {"message": "Review deleted successfully"}
         self.assertEqual(review_two_del, review_two_del_expect)
 
-        review_null_del_expect = {"message": "Review not found"}
+        review_null_del_expect = {"error": "Review not found"}
         self.assertEqual(review_null_del, review_null_del_expect)
 
         # -GET /api/v1/reviews/

@@ -2,6 +2,9 @@
 
 import unittest
 
+from app.models.place import Place
+from app.models.amenity import Amenity
+from app.models.review import Review
 from app.models.user import User
 
 
@@ -9,7 +12,10 @@ class TestUserClass(unittest.TestCase):
     def test_user_creation(self) -> None:
         print("Running test_user_creation.")
         user = User(
-            first_name="John", last_name="Doe", email="john.doe@example.com"
+            first_name="John",
+            last_name="Doe",
+            email="john.doe@example.com",
+            password="password!",
         )
         self.assertEqual(user.first_name, "John")
         self.assertEqual(user.last_name, "Doe")

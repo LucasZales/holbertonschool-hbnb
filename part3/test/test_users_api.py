@@ -3,6 +3,7 @@
 import unittest
 import requests
 import json
+from pprint import pprint
 
 
 def create_new_user(url: str, data: dict) -> None:
@@ -24,6 +25,8 @@ def create_new_user(url: str, data: dict) -> None:
         timeout=5,
     )
     good_response = json.loads(good_request.text)
+    if "id" not in good_response.keys():
+        pprint(good_response)
     return good_response["id"]
 
 
@@ -52,12 +55,13 @@ class TestUsersAPI(unittest.TestCase):
         """Test creation of user with post request to /api/v1/users."""
         print("Running test_new_user_creation.")
         headers = {"Content-Type": "application/json"}
-        good_json = '{"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"}'
+        good_json = '{"first_name": "John", "last_name": "Doe", "email": "john3.doe@example.com", "password": "password!"}'
         good_expected = {
             "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             "first_name": "John",
             "last_name": "Doe",
-            "email": "john.doe@example.com",
+            "email": "john3.doe@example.com",
+            "password": "password!",
         }
         good_reason = "CREATED"
         good_status = 201
@@ -78,7 +82,7 @@ class TestUsersAPI(unittest.TestCase):
         self.assertEqual(good_response["email"], good_expected["email"])
 
         # Test repeat for already exists err
-        repeat_json = '{"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"}'
+        repeat_json = '{"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com", "password": "password!"}'
         repeat_expected = {"error": "Email already registered"}
         repeat_reason = "BAD REQUEST"
         repeat_status = 400
@@ -94,7 +98,7 @@ class TestUsersAPI(unittest.TestCase):
         """Test post request with bad input to /api/v1/users."""
         print("Running test_bad_input.")
         headers = {"Content-Type": "application/json"}
-        bad_json = '{"first_name": 1, "last_name": {"hello":"three"}, "email": "john.doeexample.com"}'
+        bad_json = '{"first_name": 1, "last_name": {"hello":"three"}, "email": "john.doeexample.com", "password": "password!"}'
         bad_request = requests.post(
             self.url, data=bad_json, headers=headers, timeout=5
         )
@@ -140,7 +144,8 @@ class TestUsersAPI(unittest.TestCase):
         new_user_json = {
             "first_name": "Jane",
             "last_name": "Doe",
-            "email": "jane.doe@example.com",
+            "email": "jane2.doe@example.com",
+            "password": "password!",
         }
         request = requests.post(
             self.url,
@@ -154,7 +159,8 @@ class TestUsersAPI(unittest.TestCase):
             "id": good_id,
             "first_name": "Jane",
             "last_name": "Doe",
-            "email": "jane.doe@example.com",
+            "email": "jane2.doe@example.com",
+            "password": "password!",
         }
         good_reason = "OK"
         good_status = 200
@@ -209,14 +215,16 @@ class TestUsersAPI(unittest.TestCase):
         print("Running test_update_user.")
         headers = {"Content-Type": "application/json"}
         user_data_1 = {
-            "first_name": "John",
+            "first_name": "joseph",
             "last_name": "Doe",
             "email": "John.doe@example.com",
+            "password": "password!",
         }
         user_data_2 = {
             "first_name": "Jane",
             "last_name": "Doe",
-            "email": "jane.doe@example.com",
+            "email": "jane1.doe@example.com",
+            "password": "password!",
         }
         good_id = create_new_user(self.url, user_data_1)
         bad_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
@@ -224,7 +232,7 @@ class TestUsersAPI(unittest.TestCase):
             "id": good_id,
             "first_name": "Jane",
             "last_name": "Doe",
-            "email": "jane.doe@example.com",
+            "email": "jane1.doe@example.com",
         }
         bad_expected = {"error": "User not found"}
         good_reason = "OK"
