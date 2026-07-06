@@ -1,6 +1,7 @@
 """api/v1/places api endpoint."""
 
 from flask_restx import Namespace, Resource
+from app.exception.notfound import NotFoundError
 from app.services import facade
 from app.api.v1.api_models import (
     place_model,
@@ -27,6 +28,8 @@ class PlaceList(Resource):
 
         try:
             new_place = facade.create_place(place_data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
         except ValueError as e:
             return {"error": str(e)}, 400
 
@@ -116,14 +119,10 @@ class PlaceResource(Resource):
         """
         place_data = api.payload
 
-        place = facade.get_place(place_id)
-
-        if not place:
-            return {"error": "Place not found"}, 404
-
-        updated_place = facade.update_place(place_id, place_data)
-        if updated_place is None:
-            return {"error": "invalid user"}, 400
+        try:
+            facade.update_place(place_id, place_data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
         return {"message": "Place updated successfully"}, 200
 
@@ -146,6 +145,19 @@ class PlaceReviewList(Resource):
 
         if reviews is None:
             return {"error": "Place not found"}, 404
+
+        return [
+            {
+                "id": r.id,
+                "text": r.text,
+                "rating": r.rating,
+            }
+            for r in reviews
+        ], 200
+        try:
+            reviews = facade.get_reviews_by_place(place_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
         return [
             {

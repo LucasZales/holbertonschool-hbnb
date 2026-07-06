@@ -3,6 +3,7 @@
 from flask_restx import Namespace, Resource
 from app.services import facade
 from app.api.v1.api_models import review_model_creation as review_model
+from app.exception.notfound import NotFoundError
 
 api = Namespace("reviews", description="Review operations")
 
@@ -23,6 +24,8 @@ class ReviewList(Resource):
 
         try:
             review = facade.create_review(data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
         except ValueError as e:
             return {"error": str(e)}, 400
 
@@ -64,10 +67,10 @@ class ReviewResource(Resource):
             Data of review with given id.
 
         """
-        review = facade.get_review(review_id)
-
-        if not review:
-            return {"error": "Review not found"}, 404
+        try:
+            review = facade.get_review(review_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
         return {
             "id": review.id,
@@ -87,10 +90,10 @@ class ReviewResource(Resource):
         """
         data = api.payload
 
-        review = facade.update_review(review_id, data)
-
-        if not review:
-            return {"error": "Review not found"}, 404
+        try:
+            facade.update_review(review_id, data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
         return {"message": "Review updated successfully"}, 200
 
@@ -101,7 +104,8 @@ class ReviewResource(Resource):
             Success status.
 
         """
-        if not facade.get_review(review_id):
-            return {"message": "Review not found"}, 404
-        facade.delete_review(review_id)
+        try:
+            facade.delete_review(review_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
         return {"message": "Review deleted successfully"}, 200
