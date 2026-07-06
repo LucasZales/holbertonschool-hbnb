@@ -23,11 +23,8 @@ def create_app(
     app = Flask(__name__)
     app.config.from_object(config_class)
     bcrypt.init_app(app)
-<<<<<<< HEAD
     jwt.init_app(app)
-=======
     db.init_app(app)
->>>>>>> task6/database
 
     api = Api(
         app,
