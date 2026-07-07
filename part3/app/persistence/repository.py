@@ -113,7 +113,7 @@ class SQLAlchemyRepository[BaseType: BaseModel](Repository):
             Object with the given id.
 
         """
-        return self.model.query.get(obj_id)
+        return db.session.get(self.model, obj_id)  # type: ignore
 
     def get_all(self) -> list:
         """Get all objects in the ropo.

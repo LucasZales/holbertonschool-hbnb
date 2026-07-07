@@ -61,8 +61,6 @@ class ProtectedResource(Resource):
             ...
 
         """
-        print("jwt------")
-        print(get_jwt_identity())
         current_user = (
             get_jwt_identity()
         )  # Retrieve the user's identity from the token

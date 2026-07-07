@@ -3,7 +3,7 @@
 # IMPORTS
 from app import db
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class BaseModel(db.Model):
@@ -13,9 +13,11 @@ class BaseModel(db.Model):
     id = db.Column(
         db.String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
     updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        db.DateTime,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     def save(self) -> None:
