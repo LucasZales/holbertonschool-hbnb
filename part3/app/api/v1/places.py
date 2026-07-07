@@ -1,9 +1,13 @@
 """api/v1/places api endpoint."""
 
 from flask_restx import Namespace, Resource
+from app.exception.notfound import NotFoundError
 from app.services import facade
 from app.api.v1.api_models import (
     place_model,
+    place_model_return,
+    review_model_place,
+    place_model_full,
 )
 
 api = Namespace("places", description="Place operations")
@@ -27,18 +31,12 @@ class PlaceList(Resource):
 
         try:
             new_place = facade.create_place(place_data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
         except ValueError as e:
             return {"error": str(e)}, 400
 
-        return {
-            "id": new_place.id,
-            "title": new_place.title,
-            "description": new_place.description,
-            "price": new_place.price,
-            "latitude": new_place.latitude,
-            "longitude": new_place.longitude,
-            "owner_id": new_place.owner.id,
-        }, 201
+        return api.marshal(new_place, place_model_return), 201
 
     @api.response(200, "List of places retrieved successfully")
     def get(self) -> tuple:
@@ -50,15 +48,9 @@ class PlaceList(Resource):
         """
         places = facade.get_all_places()
 
-        return [
-            {
-                "id": p.id,
-                "title": p.title,
-                "latitude": p.latitude,
-                "longitude": p.longitude,
-            }
-            for p in places
-        ], 200
+        return api.marshal(
+            places, place_model_return, mask="{id,title,latitude,longitude}"
+        ), 200
 
 
 @api.route("/<place_id>")
@@ -74,34 +66,16 @@ class PlaceResource(Resource):
             Detailes of place with given id.
 
         """
-        place = facade.get_place(place_id)
+        try:
+            place = facade.get_place(place_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
-        if not place:
-            return {"error": "Place not found"}, 404
-
-        return {
-            "id": place.id,
-            "title": place.title,
-            "description": place.description,
-            "price": place.price,
-            "latitude": place.latitude,
-            "longitude": place.longitude,
-            "owner": {
-                "id": place.owner.id,
-                "first_name": place.owner.first_name,
-                "last_name": place.owner.last_name,
-                "email": place.owner.email,
-            }
-            if place.owner
-            else None,
-            "amenities": [
-                {
-                    "id": facade.get_amenity(a).id,
-                    "name": facade.get_amenity(a).name,
-                }
-                for a in getattr(place, "amenities", [])
-            ],
-        }, 200
+        return api.marshal(
+            place,
+            place_model_full,
+            mask="{id, title, description, price, latitude, longitude, owner, amenities}",
+        ), 200
 
     @api.expect(place_model, validate=True)
     @api.response(200, "Place successfully updated")
@@ -116,14 +90,10 @@ class PlaceResource(Resource):
         """
         place_data = api.payload
 
-        place = facade.get_place(place_id)
-
-        if not place:
-            return {"error": "Place not found"}, 404
-
-        updated_place = facade.update_place(place_id, place_data)
-        if updated_place is None:
-            return {"error": "invalid user"}, 400
+        try:
+            facade.update_place(place_id, place_data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
         return {"message": "Place updated successfully"}, 200
 
@@ -142,16 +112,11 @@ class PlaceReviewList(Resource):
             List of review for given place.
 
         """
-        reviews = facade.get_reviews_by_place(place_id)
+        try:
+            reviews = facade.get_reviews_by_place(place_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
 
-        if reviews is None:
-            return {"error": "Place not found"}, 404
-
-        return [
-            {
-                "id": r.id,
-                "text": r.text,
-                "rating": r.rating,
-            }
-            for r in reviews
-        ], 200
+        return api.marshal(
+            reviews, review_model_place, mask="{id, text, rating}"
+        ), 200

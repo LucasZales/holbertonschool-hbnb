@@ -1,8 +1,9 @@
 """api/v1/amenities api endpoint."""
 
+from app.exception.notfound import NotFoundError
 from flask_restx import Namespace, Resource
 from app.services import facade
-from app.api.v1.api_models import amenity_model
+from app.api.v1.api_models import amenity_model, amenity_model_place
 
 api = Namespace("amenities", description="Amenity operations")
 
@@ -24,9 +25,11 @@ class AmenityList(Resource):
         amenity_data = api.payload
         try:
             new_amenity = facade.create_amenity(amenity_data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
         except ValueError as e:
             return {"error": str(e)}, 400
-        return {"id": new_amenity.id, "name": new_amenity.name}, 201
+        return api.marshal(new_amenity, amenity_model_place), 201
 
     @api.response(200, "List of amenities retrieved successfully")
     def get(self) -> tuple:
@@ -37,10 +40,7 @@ class AmenityList(Resource):
 
         """
         amenities = facade.get_all_amenities()
-        result = []
-        for a in amenities:
-            result.append({"id": a.id, "name": a.name})
-        return result, 200
+        return api.marshal(amenities, amenity_model_place), 200
 
 
 @api.route("/<amenity_id>")
@@ -56,10 +56,11 @@ class AmenityResource(Resource):
             Amenity details, if found.
 
         """
-        amenity = facade.get_amenity(amenity_id)
-        if not amenity:
-            return {"error": "Amenity not found"}, 404
-        return {"id": amenity.id, "name": amenity.name}, 200
+        try:
+            amenity = facade.get_amenity(amenity_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
+        return api.marshal(amenity, amenity_model_place), 200
 
     @api.expect(amenity_model)
     @api.response(200, "Amenity updated successfully")
@@ -73,11 +74,10 @@ class AmenityResource(Resource):
 
         """
         amenity_data = api.payload
-        amenity = facade.get_amenity(amenity_id)
-        if not amenity:
-            return {"error": "Amenity not found"}, 404
         try:
             facade.update_amenity(amenity_id, amenity_data)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
         except ValueError as e:
             return {"error": str(e)}, 400
         return {"message": "Amenity updated successfully"}, 200
