@@ -3,6 +3,7 @@
 # IMPORTS
 from sqlalchemy.orm import validates
 from app.models.baseclass import BaseModel
+from app.models.review import Review
 from app.models.user import User
 from app.models.association_tables import place_amenity
 
@@ -38,7 +39,7 @@ class Place(BaseModel):
         longitude: float,
         owner: User,
         description: str = "",
-        amenities: list | None = None,
+        amenities: list[Amenity] | None = None,
     ) -> None:
         """Init for Place class."""
         super().__init__()
@@ -48,19 +49,20 @@ class Place(BaseModel):
         self.latitude = latitude
         self.longitude = longitude
         self.owner = owner
-        self.reviews = []
         self.amenities = amenities if amenities is not None else []
 
-    def add_review(self, review: BaseModel) -> None:
+    def add_review(self, review: Review) -> None:
         """Add review to place."""
         self.reviews.append(review)
 
-    def add_amenity(self, amenity: BaseModel) -> None:
+    def add_amenity(self, amenity: Amenity) -> None:
         """Add amenity to place."""
         self.amenities.append(amenity)
 
     @validates("amenities")
-    def validate_amenities(self, _key: str, amenities: list) -> list:
+    def validate_amenities(
+        self, _key: str, amenities: list[Amenity]
+    ) -> list[Amenity]:
         """Validate amenities list.
 
         Returns:
@@ -68,10 +70,13 @@ class Place(BaseModel):
 
         Raises:
             TypeError: if amenities is not a list.
+            ValueError: if non Amenity object in amenities
 
         """
         if not isinstance(amenities, list):
             raise TypeError("Amenities must be a list")
+        if not all(isinstance(x, Amenity) for x in amenities):
+            raise ValueError("Amenities must be a list of Amenity objects")
         return amenities
 
     @validates("title")

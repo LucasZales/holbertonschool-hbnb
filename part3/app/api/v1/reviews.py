@@ -1,5 +1,7 @@
 """api/v1/reviews api endpoint."""
 
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended.utils import get_jwt_identity
 from flask_restx import Namespace, Resource
 from app.services import facade
 from app.exception.notfound import NotFoundError
@@ -16,6 +18,7 @@ class ReviewList(Resource):
     """API endpoints for creating and listing reviews."""
 
     @api.expect(review_model, validate=True)
+    @jwt_required()
     def post(self) -> tuple:
         """Create a review.
 
@@ -24,6 +27,27 @@ class ReviewList(Resource):
 
         """
         data = api.payload
+
+        jwt_id = get_jwt_identity()
+        user_id = data["user_id"]
+        place_id = data["place_id"]
+
+        # Remove in future, just here until this is no longer possible
+        if jwt_id != user_id:
+            return {
+                "error": f"user_id and jwt do not match: \nuser_id = {user_id}, \njwt_id =  {jwt_id}"
+            }, 400
+
+        try:
+            place = facade.get_place(place_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
+
+        if user_id == place.owner_id:
+            return {"error": "user cannot review their own place"}, 400
+
+        if user_id in [x for x in place.reviews]:
+            return {}, 400
 
         try:
             review = facade.create_review(data)
