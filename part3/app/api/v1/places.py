@@ -31,6 +31,16 @@ class PlaceList(Resource):
         """
         place_data = api.payload
 
+        user_id = get_jwt_identity()
+
+        payload_id = place_data["user_id"]
+
+        # Remove in future, just here until this is no longer possible
+        if payload_id != user_id:
+            return {
+                "error": f"user_id and jwt do not match: \nuser_id = {user_id}, \njwt_id =  {payload_id}"
+            }, 400
+
         try:
             new_place = facade.create_place(place_data)
         except NotFoundError as e:
@@ -93,12 +103,21 @@ class PlaceResource(Resource):
         """
         place_data = api.payload
 
+        user_id = get_jwt_identity()
+
+        payload_id = place_data["owner_id"]
+
+        # Remove in future, just here until this is no longer possible
+        if payload_id != user_id:
+            return {
+                "error": f"owner_id and jwt do not match: \nuser_id = {user_id}, \njwt_id =  {payload_id}"
+            }, 400
+
         try:
             place = facade.get_place(place_id)
         except NotFoundError as e:
             return {"error": str(e)}, 404
 
-        user_id = get_jwt_identity()
         if user_id != place.owner_id:
             return {"error": "Unauthorized action."}, 403
 

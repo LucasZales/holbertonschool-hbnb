@@ -1,0 +1,61 @@
+from config import Config
+
+
+class APIUsersConfigStage(Config):
+    """"""
+
+    DEBUG = True
+    SQLALCHEMY_DATABASE_TYPE = ""
+    SQLALCHEMY_DATABASE_NAME = ""
+    SQLALCHEMY_DATABASE_URI = (
+        f"{SQLALCHEMY_DATABASE_TYPE}/{SQLALCHEMY_DATABASE_NAME}"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class APIUsersConfigStage1(APIUsersConfigStage):
+    """"""
+
+    DEBUG = True
+    SQLALCHEMY_DATABASE_TYPE = "sqlite://"
+    SQLALCHEMY_DATABASE_NAME = "APIUsers.1.db"
+    SQLALCHEMY_DATABASE_URI = (
+        f"{SQLALCHEMY_DATABASE_TYPE}/{SQLALCHEMY_DATABASE_NAME}"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class APIUsersConfigStage2(APIUsersConfigStage):
+    """"""
+
+    DEBUG = True
+    SQLALCHEMY_DATABASE_TYPE = "sqlite://"
+    SQLALCHEMY_DATABASE_NAME = "APIUsers.2.db"
+    SQLALCHEMY_DATABASE_URI = (
+        f"{SQLALCHEMY_DATABASE_TYPE}/{SQLALCHEMY_DATABASE_NAME}"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class APIUsersConfigStage3(APIUsersConfigStage):
+    """"""
+
+    DEBUG = True
+    SQLALCHEMY_DATABASE_TYPE = "sqlite://"
+    SQLALCHEMY_DATABASE_NAME = "APIUsers.3.db"
+    SQLALCHEMY_DATABASE_URI = (
+        f"{SQLALCHEMY_DATABASE_TYPE}/{SQLALCHEMY_DATABASE_NAME}"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class APIUsersConfigStage4(APIUsersConfigStage):
+    """"""
+
+    DEBUG = True
+    SQLALCHEMY_DATABASE_TYPE = "sqlite://"
+    SQLALCHEMY_DATABASE_NAME = "APIUsers.4.db"
+    SQLALCHEMY_DATABASE_URI = (
+        f"{SQLALCHEMY_DATABASE_TYPE}/{SQLALCHEMY_DATABASE_NAME}"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

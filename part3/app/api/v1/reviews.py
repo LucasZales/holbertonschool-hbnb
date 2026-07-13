@@ -28,14 +28,14 @@ class ReviewList(Resource):
         """
         data = api.payload
 
-        jwt_id = get_jwt_identity()
-        user_id = data["user_id"]
+        user_id = get_jwt_identity()
+        payload_id = data["user_id"]
         place_id = data["place_id"]
 
         # Remove in future, just here until this is no longer possible
-        if jwt_id != user_id:
+        if payload_id != user_id:
             return {
-                "error": f"user_id and jwt do not match: \nuser_id = {user_id}, \njwt_id =  {jwt_id}"
+                "error": f"user_id and jwt do not match: \nuser_id = {user_id}, \njwt_id =  {payload_id}"
             }, 400
 
         try:
@@ -44,10 +44,10 @@ class ReviewList(Resource):
             return {"error": str(e)}, 404
 
         if user_id == place.owner_id:
-            return {"error": "user cannot review their own place"}, 400
+            return {"error": "You cannot review your own place."}, 400
 
         if user_id in [x for x in place.reviews]:
-            return {}, 400
+            return {"error": "You have already reviewed this place."}, 400
 
         try:
             review = facade.create_review(data)
@@ -91,6 +91,7 @@ class ReviewResource(Resource):
         return api.marshal(review, review_model_full), 200
 
     @api.expect(review_model)
+    @jwt_required()
     def put(self, review_id: str) -> tuple:
         """Update review.
 
@@ -99,6 +100,23 @@ class ReviewResource(Resource):
 
         """
         data = api.payload
+        user_id = get_jwt_identity()
+
+        payload_id = data["user_id"]
+
+        # Remove in future, just here until this is no longer possible
+        if payload_id != user_id:
+            return {
+                "error": f"owner_id and jwt do not match: \nuser_id = {user_id}, \njwt_id =  {payload_id}"
+            }, 400
+
+        try:
+            review = facade.get_review(review_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
+
+        if user_id != review.user_id:
+            return {"error": "Unauthorized action."}, 403
 
         try:
             facade.update_review(review_id, data)
@@ -114,6 +132,16 @@ class ReviewResource(Resource):
             Success status.
 
         """
+        user_id = get_jwt_identity()
+
+        try:
+            review = facade.get_review(review_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
+
+        if user_id != review.user_id:
+            return {"error": "Unauthorized action."}, 403
+
         try:
             facade.delete_review(review_id)
         except NotFoundError as e:

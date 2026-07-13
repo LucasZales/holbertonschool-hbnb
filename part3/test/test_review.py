@@ -9,7 +9,7 @@ from app.models.review import Review
 
 class TestReviewClass(unittest.TestCase):
     def test_review_creation(self) -> None:
-        print("Running test_review_creation.")
+        print("\nRunning test_review_creation. : ", end="")
         user = User(
             first_name="Ricardo",
             last_name="Lopez",
