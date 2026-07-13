@@ -3,6 +3,7 @@
 from flask_restx import Namespace, Resource
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.exception.notfound import NotFoundError
 from app.services import facade
 from app.api.v1.api_models import login_model
 
@@ -29,10 +30,13 @@ class Login(Resource):
         )  # Get the email and password from the request payload
 
         # Step 1: Retrieve the user based on the provided email
-        user = facade.get_user_by_email(credentials["email"])
+        try:
+            user = facade.get_user_by_email(credentials["email"])
+        except NotFoundError:
+            return {"error": "Invalid credentials"}, 401
 
         # Step 2: Check if the user exists and the password is correct
-        if not user or not user.verify_password(credentials["password"]):
+        if not user.verify_password(credentials["password"]):
             return {"error": "Invalid credentials"}, 401
 
         # Step 3: Create a JWT token with the user's id and is_admin flag
@@ -57,8 +61,6 @@ class ProtectedResource(Resource):
             ...
 
         """
-        print("jwt------")
-        print(get_jwt_identity())
         current_user = (
             get_jwt_identity()
         )  # Retrieve the user's identity from the token

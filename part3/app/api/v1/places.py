@@ -2,6 +2,7 @@
 
 from flask_restx import Namespace, Resource
 from app.exception.notfound import NotFoundError
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services import facade
 from app.api.v1.api_models import (
     place_model,
@@ -20,6 +21,7 @@ class PlaceList(Resource):
     @api.expect(place_model, validate=True)
     @api.response(201, "Place successfully created")
     @api.response(400, "Invalid input data")
+    @jwt_required()
     def post(self) -> tuple:
         """Register a new place.
 
@@ -81,6 +83,7 @@ class PlaceResource(Resource):
     @api.response(200, "Place successfully updated")
     @api.response(404, "Place not found")
     @api.response(400, "Invalid input data")
+    @jwt_required()
     def put(self, place_id: str) -> tuple:
         """Update place data.
 
@@ -91,6 +94,15 @@ class PlaceResource(Resource):
         place_data = api.payload
 
         try:
+            place = facade.get_place(place_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
+
+        user_id = get_jwt_identity()
+        if user_id != place.owner_id:
+            return {"error": "Unauthorized action."}, 403
+
+        try:
             facade.update_place(place_id, place_data)
         except NotFoundError as e:
             return {"error": str(e)}, 404
@@ -99,8 +111,6 @@ class PlaceResource(Resource):
 
 
 # endpoint for reviews
-
-
 @api.route("/<place_id>/reviews")
 class PlaceReviewList(Resource):
     """API endpoint for listing rreviews of a place."""

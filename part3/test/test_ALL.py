@@ -14,8 +14,8 @@ def check_response(
 ) -> dict | None:
     if response.status != expected_status:
         print("###################")
-        print(response.json)
-        print(response.status)
+        pprint(response.json)
+        pprint(response.status)
         print("###################")
     self.assertEqual(response.status, expected_status)
     return response.json
@@ -123,6 +123,139 @@ class TestALL(unittest.TestCase):
         user_two_id = user_two_json["id"]
         user_null_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
+        # LOGIN API TESTS
+        login_one_init = {
+            "email": user_one_init["email"],
+            "password": user_one_init["password"],
+        }
+
+        login_two_init = {
+            "email": user_two_init["email"],
+            "password": user_two_init["password"],
+        }
+
+        login_badpass_init = {
+            "email": user_one_init["email"],
+            "password": "weegwerr",
+        }
+
+        login_baddata_init = {
+            "email": "john.doe@example.com",
+            "password": 4,
+        }
+
+        login_null_init = {
+            "email": "dragons@here.be",
+            "password": "pass",
+        }
+
+        login_one_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_one_init,
+                headers=headers,
+            ),
+            "200 OK",
+        )
+
+        login_two_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_two_init,
+                headers=headers,
+            ),
+            "200 OK",
+        )
+
+        login_badpass_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_badpass_init,
+                headers=headers,
+            ),
+            "401 UNAUTHORIZED",
+        )
+
+        login_baddata_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_baddata_init,
+                headers=headers,
+            ),
+            "400 BAD REQUEST",
+        )
+        login_null_json = check_response(
+            self,
+            self.client.post(
+                f"{url}/auth/login",
+                json=login_null_init,
+                headers=headers,
+            ),
+            "401 UNAUTHORIZED",
+        )
+
+        if login_one_json is None:
+            raise ValueError("err: login_one_json is None")
+        if login_two_json is None:
+            raise ValueError("err: login_two_json is None")
+        if login_badpass_json is None:
+            raise ValueError("err: login_badpass_json is None")
+        if login_baddata_json is None:
+            raise ValueError("err: login_baddata_json is None")
+        if login_null_json is None:
+            raise ValueError("err: login_null_json is None")
+        login_one_jwt = login_one_json["access_token"]
+        login_two_jwt = login_two_json["access_token"]
+        login_invalid_jwt = "\
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVC\
+J9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc4\
+MzA4OTc0MiwianRpIjoiNGRjZjEwYzktMjg4\
+ZC00MjgyLTliZDktYzY0YzkyN2JiODVmIiwid\
+HlwZSI6ImFjY2VzcyIsInN1YiI6IjU3MWYzMGM\
+3LWFmMWUtNDViYy04ZTgzLTE4YmNhY2YyY2YwYS\
+IsIm5iZiI6MTc4MzA4OTc0MiwiY3NyZiI6IjJiZG\
+ZjODRjLTZmYWUtNGFlYi1iNjNhLWFjZTcwNjE2ZDc\
+1MiIsImV4cCI6MTc4MzA5MDY0MiwiaXNfYWRtaW4iO\
+mZhbHNlfQ.PfM4uyCss9OzIWTGtbsOH9-eGgxOC97rZf0jQB8-g3k"
+        # ACCESS PROTECTED ROUTES
+        protected_one_headers = {"Authorization": f"Bearer {login_one_jwt}"}
+        protected_two_headers = {"Authorization": f"Bearer {login_two_jwt}"}
+
+        protected_invalid_headers = {
+            "Authorization": f"Bearer {login_invalid_jwt}"
+        }
+
+        protected_one_json = check_response(
+            self,
+            self.client.get(
+                f"{url}/auth/protected",
+                headers=protected_one_headers,
+            ),
+            "200 OK",
+        )
+
+        protected_invalid_json = check_response(
+            self,
+            self.client.get(
+                f"{url}/auth/protected",
+                headers=protected_invalid_headers,
+            ),
+            "422 UNPROCESSABLE ENTITY",
+        )
+
+        protected_null_json = check_response(
+            self,
+            self.client.get(
+                f"{url}/auth/protected",
+            ),
+            "401 UNAUTHORIZED",
+        )
+
+        # USER API RESUMED
         user_two_updated = check_response(
             self,
             self.client.put(
@@ -235,7 +368,7 @@ class TestALL(unittest.TestCase):
             self.client.post(
                 f"{url}/places/",
                 json=place_one_init,
-                headers=headers,
+                headers=headers | protected_one_headers,
             ),
             "201 CREATED",
         )
@@ -245,7 +378,7 @@ class TestALL(unittest.TestCase):
             self.client.post(
                 f"{url}/places/",
                 json=place_two_init,
-                headers=headers,
+                headers=headers | protected_two_headers,
             ),
             "201 CREATED",
         )
@@ -255,7 +388,7 @@ class TestALL(unittest.TestCase):
             self.client.post(
                 f"{url}/places/",
                 json=place_bad_init,
-                headers=headers,
+                headers=headers | protected_one_headers,
             ),
             "404 NOT FOUND",
         )
@@ -276,7 +409,7 @@ class TestALL(unittest.TestCase):
             self.client.put(
                 f"{url}/places/{place_two_id}",
                 json=place_two_update,
-                headers=headers,
+                headers=headers | protected_two_headers,
             ),
             "200 OK",
         )
@@ -286,7 +419,7 @@ class TestALL(unittest.TestCase):
             self.client.put(
                 f"{url}/places/{place_null_id}",
                 json=place_null_update,
-                headers=headers,
+                headers=headers | protected_two_headers,
             ),
             "404 NOT FOUND",
         )
@@ -459,7 +592,7 @@ class TestALL(unittest.TestCase):
         review_badvalue_init = {
             "text": "",
             "rating": 30,
-            "user_id": user_null_id,
+            "user_id": user_two_id,
             "place_id": place_null_id,
         }
 
@@ -477,7 +610,7 @@ class TestALL(unittest.TestCase):
             self.client.post(
                 f"{url}/reviews/",
                 json=review_one_init,
-                headers=headers,
+                headers=headers | protected_one_headers,
             ),
             "201 CREATED",
         )
@@ -487,7 +620,7 @@ class TestALL(unittest.TestCase):
             self.client.post(
                 f"{url}/reviews/",
                 json=review_two_init,
-                headers=headers,
+                headers=headers | protected_two_headers,
             ),
             "201 CREATED",
         )
@@ -507,7 +640,7 @@ class TestALL(unittest.TestCase):
             self.client.post(
                 f"{url}/reviews/",
                 json=review_badvalue_init,
-                headers=headers,
+                headers=headers | protected_two_headers,
             ),
             "404 NOT FOUND",
         )
@@ -632,119 +765,6 @@ class TestALL(unittest.TestCase):
                 headers=headers,
             ),
             "404 NOT FOUND",
-        )
-
-        # LOGIN API TESTS
-        login_one_init = {
-            "email": user_one_init["email"],
-            "password": user_one_init["password"],
-        }
-
-        login_badpass_init = {
-            "email": user_one_init["email"],
-            "password": "weegwerr",
-        }
-
-        login_baddata_init = {
-            "email": "john.doe@example.com",
-            "password": 4,
-        }
-
-        login_null_init = {
-            "email": "dragons@here.be",
-            "password": "pass",
-        }
-
-        login_one_json = check_response(
-            self,
-            self.client.post(
-                f"{url}/auth/login",
-                json=login_one_init,
-                headers=headers,
-            ),
-            "200 OK",
-        )
-
-        login_badpass_json = check_response(
-            self,
-            self.client.post(
-                f"{url}/auth/login",
-                json=login_badpass_init,
-                headers=headers,
-            ),
-            "401 UNAUTHORIZED",
-        )
-
-        login_baddata_json = check_response(
-            self,
-            self.client.post(
-                f"{url}/auth/login",
-                json=login_baddata_init,
-                headers=headers,
-            ),
-            "400 BAD REQUEST",
-        )
-        login_null_json = check_response(
-            self,
-            self.client.post(
-                f"{url}/auth/login",
-                json=login_null_init,
-                headers=headers,
-            ),
-            "401 UNAUTHORIZED",
-        )
-
-        if login_one_json is None:
-            raise ValueError("err: login_one_json is None")
-        if login_badpass_json is None:
-            raise ValueError("err: login_badpass_json is None")
-        if login_baddata_json is None:
-            raise ValueError("err: login_baddata_json is None")
-        if login_null_json is None:
-            raise ValueError("err: login_null_json is None")
-        login_one_jwt = login_one_json["access_token"]
-        login_invalid_jwt = "\
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVC\
-J9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc4\
-MzA4OTc0MiwianRpIjoiNGRjZjEwYzktMjg4\
-ZC00MjgyLTliZDktYzY0YzkyN2JiODVmIiwid\
-HlwZSI6ImFjY2VzcyIsInN1YiI6IjU3MWYzMGM\
-3LWFmMWUtNDViYy04ZTgzLTE4YmNhY2YyY2YwYS\
-IsIm5iZiI6MTc4MzA4OTc0MiwiY3NyZiI6IjJiZG\
-ZjODRjLTZmYWUtNGFlYi1iNjNhLWFjZTcwNjE2ZDc\
-1MiIsImV4cCI6MTc4MzA5MDY0MiwiaXNfYWRtaW4iO\
-mZhbHNlfQ.PfM4uyCss9OzIWTGtbsOH9-eGgxOC97rZf0jQB8-g3k"
-        # ACCESS PROTECTED ROUTES
-        protected_one_headers = {"Authorization": f"Bearer {login_one_jwt}"}
-
-        protected_invalid_headers = {
-            "Authorization": f"Bearer {login_invalid_jwt}"
-        }
-
-        protected_one_json = check_response(
-            self,
-            self.client.get(
-                f"{url}/auth/protected",
-                headers=protected_one_headers,
-            ),
-            "200 OK",
-        )
-
-        protected_invalid_json = check_response(
-            self,
-            self.client.get(
-                f"{url}/auth/protected",
-                headers=protected_invalid_headers,
-            ),
-            "422 UNPROCESSABLE ENTITY",
-        )
-
-        protected_null_json = check_response(
-            self,
-            self.client.get(
-                f"{url}/auth/protected",
-            ),
-            "401 UNAUTHORIZED",
         )
 
         # RESPONSE DATA TESTS
@@ -939,7 +959,7 @@ mZhbHNlfQ.PfM4uyCss9OzIWTGtbsOH9-eGgxOC97rZf0jQB8-g3k"
         }
         self.assertDictEqual(review_badtype_json, review_badtype_expected)
 
-        review_badvalue_expected = {"error": "User not found"}
+        review_badvalue_expected = {"error": "Place not found"}
         self.assertDictEqual(review_badvalue_json, review_badvalue_expected)
 
         # -PUT /api/v1/reviews/<review_id>
