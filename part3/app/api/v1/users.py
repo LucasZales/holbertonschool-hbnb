@@ -1,5 +1,6 @@
 """api/v1/users api endpoint."""
 
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Namespace, Resource
 from app.services import facade
 from app.exception.notfound import NotFoundError
@@ -35,6 +36,7 @@ class UserList(Resource):
         user_data = api.payload
 
         # Simulate email uniqueness check (to be replaced by real validation with persistence)
+        # ```
         try:
             existing_user = facade.get_user_by_email(user_data["email"])
         except NotFoundError:
@@ -42,8 +44,13 @@ class UserList(Resource):
 
         if existing_user:
             return {"error": "Email already registered"}, 400
+        # ```
 
-        new_user = facade.create_user(user_data)
+        try:
+            new_user = facade.create_user(user_data)
+        except ValueError as e:
+            return {"error": str(e)}, 400
+
         return api.marshal(new_user, user_model_full), 201
 
     def get(self) -> tuple:
@@ -85,6 +92,7 @@ class UserResource(Resource):
     @api.response(400, "Invalid input data")
     @api.response(404, "User not found")
     @api.doc(params={"user_id": "id of user to update"})
+    @jwt_required()
     def put(self, user_id: str) -> tuple:
         """Update user data.
 
@@ -93,6 +101,22 @@ class UserResource(Resource):
 
         """
         user_data = api.payload
+        jwt_id = get_jwt_identity()
+
+        try:
+            user = facade.get_user(user_id)
+        except NotFoundError as e:
+            return {"error": str(e)}, 404
+
+        if jwt_id != user.id:
+            return {"error": "Unauthorized action."}, 403
+
+        if user_data["email"] != user.email:
+            return {"error": "You cannot modify email."}, 400
+
+        if not user.verify_password(user_data["password"]):
+            return {"error": "You cannot modify password."}, 400
+
         try:
             user = facade.update_user(user_id, user_data)
         except NotFoundError as e:
