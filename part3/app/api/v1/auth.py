@@ -1,10 +1,9 @@
-"""api/v1/login api endpoint."""
-
 from flask_restx import Namespace, Resource
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from functools import wraps
-from app.exception.notfound import NotFoundError, NotAuthorizedError
+from flask import g
+from app.exception.notfound import NotFoundError
+from app.exception.notauthorized import NotAuthorizedError
 from app.services import facade
 from app.api.v1.api_models import login_model
 
@@ -76,16 +75,33 @@ def jwt_authorise(get_object):
     """Decorator to Verify Ownership"""
     def decorator(func):
         @wraps(func)
-        @jwt_required
-        def authorise(object_id, *args, **kwargs):
-            obj = get_object(object_id)
+        @jwt_required()
+        def authorise(self, *args, **kwargs):
+            object_id = kwargs.get("place_id") or kwargs.get(
+                "user_id") or kwargs.get("review_id") or kwargs.get("amenity_id")
+            if not object_id and args:
+                object_id = args[0]
+
+            try:
+                obj = get_object(object_id)
+            except NotFoundError:
+                return {"error": "Resource not found."}, 404
+
             if obj is None:
-                raise NotFoundError()
-            owner_id = getattr(obj, "owner_id", None)
-            if owner_id is None:
+                return {"error": "Resource not found."}, 404
+
+            if hasattr(obj, "owner_id"):
+                owner_id = obj.owner_id
+            elif hasattr(obj, "user_id"):
                 owner_id = obj.user_id
-            if not get_jwt()["is_admin"] and get_jwt_identity() != owner_id:
-                raise NotAuthorizedError("Unauthorized action.")
-            return func(obj, *args, **kwargs)
+            else:
+                owner_id = obj.id
+            current_identity = str(get_jwt_identity())
+            owner_identity = str(owner_id)
+            is_admin = get_jwt().get("is_admin", False)
+            if not is_admin and current_identity != owner_identity:
+                return {"error": "Unauthorized action."}, 403
+            g.validated_obj = obj
+            return func(self, *args, **kwargs)
         return authorise
     return decorator

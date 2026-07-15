@@ -17,7 +17,7 @@ class AmenityList(Resource):
     @api.expect(amenity_model)
     @api.response(201, "Amenity successfully created")
     @api.response(400, "Invalid input data")
-    @jwt_authorise(facade.get_place)
+    @jwt_authorise(facade.get_amenity)
     def post(self) -> tuple:
         """Register a new amenity.
 
@@ -67,11 +67,11 @@ class AmenityResource(Resource):
             return {"error": str(e)}, 404
         return api.marshal(amenity, amenity_model_place), 200
 
-    @jwt_authorise(facade.get_place)
     @api.expect(amenity_model)
     @api.response(200, "Amenity updated successfully")
     @api.response(404, "Amenity not found")
     @api.response(400, "Invalid input data")
+    @jwt_authorise(facade.get_amenity)
     def put(self, amenity_id: str) -> tuple:
         """Update an amenity's information.
 
