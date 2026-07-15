@@ -4,6 +4,7 @@ from flask_restx import Namespace, Resource
 from flask_jwt_extended import jwt_required, get_jwt
 from app.services import facade
 from app.exception.notfound import NotFoundError
+from app.api.v1.auth import jwt_authorise
 from app.api.v1.api_models import user_model_full, user_model_input
 
 # Any use of @api.response(<status code>, <string>)
@@ -56,6 +57,7 @@ class UserList(Resource):
 
 		return api.marshal(new_user, user_model_full), 201
 
+    @jwt_authorise(facade.get_place)
 	def get(self) -> tuple:
 		"""Retrive full user list.
 
@@ -74,6 +76,7 @@ class UserResource(Resource):
 	@api.response(200, "User details retrieved successfully")
 	@api.response(404, "User not found")
 	@api.doc(params={"user_id": "id of user to get"})
+    @jwt_authorise(facade.get_place)
 	def get(self, user_id: str) -> tuple:
 		"""Get user details by ID.
 
@@ -90,12 +93,12 @@ class UserResource(Resource):
 
 		return api.marshal(user, user_model_full), 200
 
-	@jwt_required()
 	@api.expect(user_model_input, validate=True)
 	@api.response(200, "User successfully updated")
 	@api.response(400, "Invalid input data")
 	@api.response(404, "User not found")
 	@api.doc(params={"user_id": "id of user to update"})
+    @jwt_authorise(facade.get_place)
 	def put(self, user_id: str) -> tuple:
 		"""Update user data.
 

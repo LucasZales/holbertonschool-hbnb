@@ -95,49 +95,34 @@ class ReviewResource(Resource):
 
 		return api.marshal(review, review_model_full), 200
 
-	@jwt_required()
+    @jwt_authorise(facade.get_place)
 	@api.expect(review_model)
-	def put(self, review_id: str) -> tuple:
+	def put(self, review) -> tuple:
 		"""Update review.
 
 		Returns:
 			Data of update review.
 
 		"""
-		user_id = get_jwt_identity()
-
-		try:
-			review = facade.get_review(review_id)
-		except NotFoundError as e:
-			return {"error": str(e)}, 404
-
 		data = api.payload
 
 		try:
-			facade.authorise(True, user_id, review)
 			facade.update_review(review_id, data)
 		except NotFoundError as e:
 			return {"error": str(e)}, 404
 
 		return {"message": "Review updated successfully"}, 200
 
-	@jwt_required()
-	def delete(self, review_id: str) -> tuple:
+    @jwt_authorise(facade.get_place)
+	def delete(self, review) -> tuple:
 		"""Delete review.
 
 		Returns:
 			Success status.
 
 		"""
-		user_id = get_jwt_identity()
 
 		try:
-			review = facade.get_review(review_id)
-		except NotFoundError as e:
-			return {"error": str(e)}, 404
-
-		try:
-			facade.authorise(True, user_id, review)
 			facade.delete_review(review_id)
 		except NotFoundError as e:
 			return {"error": str(e)}, 404

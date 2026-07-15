@@ -23,25 +23,25 @@ class HBnBFacade:
 		self.review_repo = ReviewRepository()
 		self.amenity_repo = AmenityRepository()
 
-		# Authorisation
-		def authorise(self, admin_access, identity, resource):
-			current_user = get_jwt()
-			user_id = get_jwt_identity()
+	# Authorisation
+	def authorise(self, admin_access, identity, resource):
+		current_user = get_jwt()
+		user_id = get_jwt_identity()
 
-			if admin_access and current_user.get('is_admin') or not resource:
+		if admin_access and current_user.get('is_admin') or not resource:
+			return True
+
+		permissions = [
+			[User, lambda res: user_id is res.id],
+			[Place, lambda res: user_id is res.owner_id],
+			[Review, lambda res: user_id is res.user_id],
+		]
+
+		for permission in permissions:
+			if isinstance(resource, permission[0]) and permission[1](resource):
 				return True
 
-			permissions = [
-				[User, lambda res: user_id is res.id],
-				[Place, lambda res: user_id is res.owner_id],
-				[Review, lambda res: user_id is res.user_id],
-			]
-
-			for permission in permissions:
-				if isinstance(resource, permission[0]) and permission[1](resource):
-					return True
-
-			raise NotAuthorizedError("Unauthorized action.")
+		raise NotAuthorizedError("Unauthorized action.")
 
 	# User methods
 

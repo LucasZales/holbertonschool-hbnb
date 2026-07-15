@@ -3,7 +3,8 @@
 from flask_restx import Namespace, Resource
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.exception.notfound import NotFoundError
+from functools import wraps
+from app.exception.notfound import NotFoundError, NotAuthorizedError
 from app.services import facade
 from app.api.v1.api_models import login_model
 
@@ -69,3 +70,22 @@ class ProtectedResource(Resource):
         # addtional claims = get_jwt()
         # additional claims["is_admin"] -> True or False
         return {"message": f"Hello, user {current_user}"}, 200
+
+
+def jwt_authorise(get_object):
+    """Decorator to Verify Ownership"""
+    def decorator(func):
+        @wraps(func)
+        @jwt_required
+        def authorise(object_id, *args, **kwargs):
+            obj = get_object(object_id)
+            if obj is None:
+                raise NotFoundError()
+            owner_id = getattr(obj, "owner_id", None)
+            if owner_id is None:
+                owner_id = obj.user_id
+            if not get_jwt()["is_admin"] and get_jwt_identity() != owner_id:
+                raise NotAuthorizedError("Unauthorized action.")
+            return func(obj, *args, **kwargs)
+        return authorise
+    return decorator
