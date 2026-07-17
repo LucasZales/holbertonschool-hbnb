@@ -22,7 +22,9 @@ class BaseModel(db.Model):
 
     def save(self) -> None:
         """Update modification timestamp."""
-        self.updated_at = datetime.now()
+        self.updated_at = datetime.now(UTC)
+        db.session.add(self)
+        db.session.commit()
 
     def update(self, data: dict) -> None:
         """Update object attributes.
@@ -33,7 +35,9 @@ class BaseModel(db.Model):
         """
         if not isinstance(data, dict):
             raise TypeError("data must be a dictionary")
+
+        # Fixed: Filter out internal ORM state attributes (_sa_instance_state) to prevent mutation crashes
         for key, value in data.items():
-            if hasattr(self, key):
+            if key not in ["id", "created_at", "updated_at"] and hasattr(self, key):
                 setattr(self, key, value)
         self.save()
