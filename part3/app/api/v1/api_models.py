@@ -37,6 +37,15 @@ user_model_input = api.inherit(
         ),
     },
 )
+user_model_update = api.model(
+    "UserUpdate",
+    {
+        "first_name": fields.String,
+        "last_name": fields.String,
+        "email": fields.String,
+        "password": fields.String,
+    }
+)
 user_model_full = api.inherit(
     "User_Full",
     user_model_base,

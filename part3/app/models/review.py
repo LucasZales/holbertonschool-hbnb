@@ -10,11 +10,20 @@ class Review(BaseModel):
     """Review class for HBnB."""
 
     __tablename__ = "reviews"
-    text = db.Column(db.String, nullable=False)
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id",
+            "place_id",
+            name="unique_review"
+        ),
+    )
+    text = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=False)
 
-    place_id = db.Column(db.String, db.ForeignKey("places.id"), nullable=False)
-    user_id = db.Column(db.String, db.ForeignKey("users.id"), nullable=False)
+    place_id = db.Column(db.String(36), db.ForeignKey(
+        "places.id", ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.String(36), db.ForeignKey(
+        "users.id", ondelete="CASCADE"), nullable=False)
 
     def __init__(
         self,
@@ -27,8 +36,10 @@ class Review(BaseModel):
         super().__init__()
         self.text = text
         self.rating = rating
-        self.user_id = user.id
-        self.place_id = place.id
+        # Fixed: Explicitly binding backref structures to relational properties
+        # instead of raw scalar foreign keys during initialization
+        self.user = user
+        self.place = place
 
     # VALIDATERS
     @validates("text")

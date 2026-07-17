@@ -14,321 +14,330 @@ from app.models.review import Review
 
 
 class HBnBFacade:
-	"""Facade layer to handle communication between layers."""
+    """Facade layer to handle communication between layers."""
 
-	def __init__(self) -> None:
-		"""Init for HBnBFacade class."""
-		self.user_repo = UserRepository()
-		self.place_repo = PlaceRepository()
-		self.review_repo = ReviewRepository()
-		self.amenity_repo = AmenityRepository()
+    def __init__(self) -> None:
+        """Init for HBnBFacade class."""
+        self.user_repo = UserRepository()
+        self.place_repo = PlaceRepository()
+        self.review_repo = ReviewRepository()
+        self.amenity_repo = AmenityRepository()
 
-	# Authorisation
-	def authorise(self, admin_access, identity, resource):
-		current_user = get_jwt()
-		user_id = get_jwt_identity()
+    # Authorisation
+    def authorise(self, admin_access, identity, resource):
+        """Authorize user access to a specific resource."""
+        current_user = get_jwt()
+        user_id = get_jwt_identity()
 
-		if admin_access and current_user.get('is_admin') or not resource:
-			return True
+        if admin_access and current_user.get('is_admin') or not resource:
+            return True
 
-		permissions = [
-			[User, lambda res: user_id is res.id],
-			[Place, lambda res: user_id is res.owner_id],
-			[Review, lambda res: user_id is res.user_id],
-		]
+        # Fixed: Changed 'is' comparison to standard equality '==' for string matching
+        permissions = [
+            [User, lambda res: str(user_id) == str(res.id)],
+            [Place, lambda res: str(user_id) == str(res.owner_id)],
+            [Review, lambda res: str(user_id) == str(res.user_id)],
+        ]
 
-		for permission in permissions:
-			if isinstance(resource, permission[0]) and permission[1](resource):
-				return True
+        for permission in permissions:
+            if isinstance(resource, permission[0]) and permission[1](resource):
+                return True
 
-		raise NotAuthorizedError("Unauthorized action.")
+        raise NotAuthorizedError("Unauthorized action.")
 
-	# User methods
+    # User methods
 
-	def create_user(self, user_data: dict) -> User:
-		"""Create a user object and add it to the database.
+    def create_user(self, user_data: dict) -> User:
+        """Create a user object and add it to the database.
 
-		Returns:
-				The user object.
+        Returns:
+            The user object.
 
-		"""
-		user = User(**user_data)
-		# What does this line do, does it mean i need to rewrite the init for User class?
-		user.hash_password(user_data["password"])
-		self.user_repo.add(user)
-		return user
+        """
+        user = User(**user_data)
+        self.user_repo.add(user)
+        return user
 
-	def get_user(self, user_id: str) -> User:
-		"""Retive User object by id.
+    def get_user(self, user_id: str) -> User:
+        """Retive User object by id.
 
-		Returns:
-				User object.
+        Returns:
+            User object.
 
-		Raises:
-				NotFoundError: if user not in repo
+        Raises:
+            NotFoundError: if user not in repo
 
-		"""
-		user = self.user_repo.get(user_id)
-		if user is None:
-			raise NotFoundError("User not found")
-		return user
+        """
+        user = self.user_repo.get(user_id)
+        if user is None:
+            raise NotFoundError("User not found")
+        return user
 
-	def get_user_by_email(self, email: str) -> User:
-		"""Retive a user object by email.
+    def get_user_by_email(self, email: str) -> User:
+        """Retive a user object by email.
 
-		Returns:
-				User object.
+        Returns:
+            User object.
 
-		Raises:
-				NotFoundError: if user not in repo
+        Raises:
+            NotFoundError: if user not in repo
 
-		"""
-		user = self.user_repo.get_user_by_email(email)
-		if user is None:
-			raise NotFoundError("User not found")
-		return user
+        """
+        user = self.user_repo.get_user_by_email(email)
+        if user is None:
+            raise NotFoundError("User not found")
+        return user
 
-	def get_user_list(self) -> list:
-		"""Retrive a list of all users.
+    def get_user_list(self) -> list:
+        """Retrive a list of all users.
 
-		Returns:
-				list of all user objects
+        Returns:
+            list of all user objects
 
-		"""
-		return self.user_repo.get_all()
+        """
+        return self.user_repo.get_all()
 
-	def update_user(self, user_id: str, user_data: dict) -> User:
-		"""Update a user object.
+    def update_user(self, user_id: str, user_data: dict) -> User:
+        """Update a user object.
 
-		Returns:
-				updated user object
+        Returns:
+            updated user object
 
-		Raises:
-				NotFoundError: if user not in repo
+        Raises:
+            NotFoundError: if user not in repo
 
-		"""
-		user = self.get_user(user_id)
-		if user is None:
-			raise NotFoundError("User not found")
-		self.user_repo.update(user_id, user_data)
-		return user
+        """
+        user = self.get_user(user_id)
+        self.user_repo.update(user_id, user_data)
+        return user
 
-	# PLACE METHODS
-	def create_place(self, place_data: dict) -> Place:
-		"""Create a place and add it to the database.
+    # PLACE METHODS
+    def create_place(self, place_data: dict) -> Place:
+        """Create a place and add it to the database.
 
-		Returns:
-				Created place.
+        Returns:
+            Created place.
 
-		Raises:
-				NotFoundError: if owner not in repo
+        Raises:
+            NotFoundError: if owner not in repo
 
-		"""
-		owner = self.user_repo.get(place_data["owner_id"])
-		if owner is None:
-			raise NotFoundError("Owner not found")
-		place_data["owner"] = owner
-		del place_data["owner_id"]
+        """
+        owner = self.user_repo.get(place_data["owner_id"])
+        if owner is None:
+            raise NotFoundError("Owner not found")
 
-		place = Place(**place_data)
-		self.place_repo.add(place)
-		return place
+        # Extracted foreign key handling safely for relational backrefs
+        place_data_copy = place_data.copy()
+        place_data_copy["owner"] = owner
+        if "owner_id" in place_data_copy:
+            del place_data_copy["owner_id"]
 
-	def get_place(self, place_id: str) -> Place:
-		"""Get place by id.
+        place = Place(**place_data_copy)
+        self.place_repo.add(place)
+        return place
 
-		Returns:
-				Place with given id.
+    def get_place(self, place_id: str) -> Place:
+        """Get place by id.
 
-		Raises:
-				NotFoundError: if place not in repo
+        Returns:
+            Place with given id.
 
-		"""
-		place = self.place_repo.get(place_id)
-		if place is None:
-			raise NotFoundError("Place not found")
-		return place
+        Raises:
+            NotFoundError: if place not in repo
 
-	def get_all_places(self) -> list:
-		"""Retive a list of all place objects in the database.
+        """
+        place = self.place_repo.get(place_id)
+        if place is None:
+            raise NotFoundError("Place not found")
+        return place
 
-		Returns:
-				list of place objects
+    def get_all_places(self) -> list:
+        """Retive a list of all place objects in the database.
 
-		"""
-		return self.place_repo.get_all()
+        Returns:
+            list of place objects
 
-	def update_place(self, place_id: str, place_data: dict) -> Place:
-		"""Update a place.
+        """
+        return self.place_repo.get_all()
 
-		Returns:
-				Updated place.
-
-		Raises:
-				NotFoundError: if place or owner not in repo
+    def update_place(self, place_id: str, place_data: dict) -> Place:
+        """Update a place.
 
-		"""
-		place = self.place_repo.get(place_id)
-		owner = self.user_repo.get(place_data["owner_id"])
-		if place is None:
-			raise NotFoundError("Place not found")
-		if owner is None:
-			raise NotFoundError("Owner not found")
-		self.place_repo.update(place_id, place_data)
-		return place
+        Returns:
+            Updated place.
 
-	def delete_place(self, place_id: str) -> None:
-		"""Delete place.
-
-		Raises:
-				NotFoundError: if place not in repo
+        Raises:
+            NotFoundError: if place or owner not in repo
 
-		"""
-		place = self.place_repo.get(place_id)
-		if place is None:
-			raise NotFoundError("Place not found")
-		self.place_repo.delete(place_id)
+        """
+        place = self.place_repo.get(place_id)
+        if place is None:
+            raise NotFoundError("Place not found")
 
-	# AMENITY METHODS
-	def create_amenity(self, amenity_data: dict) -> Amenity:
-		"""Create amenity and save to database.
+        # Fixed: Safely check for owner validation only if owner_id is passed in the update payload
+        if "owner_id" in place_data:
+            owner = self.user_repo.get(place_data["owner_id"])
+            if owner is None:
+                raise NotFoundError("Owner not found")
 
-		Returns:
-				Created amenity object
+        self.place_repo.update(place_id, place_data)
+        return place
 
-		"""
-		amenity = Amenity(**amenity_data)
-		self.amenity_repo.add(amenity)
-		return amenity
+    def delete_place(self, place_id: str) -> None:
+        """Delete place.
 
-	def get_amenity(self, amenity_id: str) -> Amenity:
-		"""Retrive amenity object by id.
+        Raises:
+            NotFoundError: if place not in repo
 
-		Returns:
-				amenity object or None
+        """
+        place = self.place_repo.get(place_id)
+        if place is None:
+            raise NotFoundError("Place not found")
+        self.place_repo.delete(place_id)
 
-		Raises:
-				NotFoundError: if amenity not in repo
+    # AMENITY METHODS
+    def create_amenity(self, amenity_data: dict) -> Amenity:
+        """Create amenity and save to database.
 
-		"""
-		amenity = self.amenity_repo.get(amenity_id)
-		if amenity is None:
-			raise NotFoundError("Amenity not found")
-		return amenity
+        Returns:
+            Created amenity object
 
-	def get_all_amenities(self) -> list:
-		"""Retive a list of all amenity objects in the database.
+        """
+        amenity = Amenity(**amenity_data)
+        self.amenity_repo.add(amenity)
+        return amenity
 
-		Returns:
-				list of amenity objects
+    def get_amenity(self, amenity_id: str) -> Amenity:
+        """Retrive amenity object by id.
 
-		"""
-		return self.amenity_repo.get_all()
+        Returns:
+            amenity object or None
 
-	def update_amenity(self, amenity_id: str, amenity_data: dict) -> None:
-		"""Update an amenity.
+        Raises:
+            NotFoundError: if amenity not in repo
 
-		Raises:
-				NotFoundError: if amenity not in repo
+        """
+        amenity = self.amenity_repo.get(amenity_id)
+        if amenity is None:
+            raise NotFoundError("Amenity not found")
+        return amenity
 
-		"""
-		amenity = self.get_amenity(amenity_id)
-		if amenity is None:
-			raise NotFoundError("Amenity not found")
-		self.amenity_repo.update(amenity_id, amenity_data)
+    def get_all_amenities(self) -> list:
+        """Retive a list of all amenity objects in the database.
 
-	# REVIEW METHODS
-	def create_review(self, review_data: dict) -> Review:
-		"""Create a review and save it to database.
+        Returns:
+            list of amenity objects
 
-		Returns:
-				Created review.
+        """
+        return self.amenity_repo.get_all()
 
-		Raises:
-				NotFoundError: if place or user not in repo
+    def update_amenity(self, amenity_id: str, amenity_data: dict) -> None:
+        """Update an amenity.
 
-		"""
-		user = self.user_repo.get(review_data["user_id"])
-		place = self.place_repo.get(review_data["place_id"])
-		if user is None:
-			raise NotFoundError("User not found")
-		if place is None:
-			raise NotFoundError("Place not found")
+        Raises:
+            NotFoundError: if amenity not in repo
 
-		review_data["user"] = user
-		review_data["place"] = place
-		del review_data["user_id"]
-		del review_data["place_id"]
+        """
+        amenity = self.get_amenity(amenity_id)
+        if amenity is None:
+            raise NotFoundError("Amenity not found")
+        self.facility_repo.update(amenity_id, amenity_data) if hasattr(
+            self, 'facility_repo') else self.amenity_repo.update(amenity_id, amenity_data)
 
-		review = Review(**review_data)
-		self.review_repo.add(review)
-		place.add_review(review)
-		return review
+    # REVIEW METHODS
+    def create_review(self, review_data: dict) -> Review:
+        """Create a review and save it to database.
 
-	def get_review(self, review_id: str) -> Review:
-		"""Get review by id.
+        Returns:
+            Created review.
 
-		Returns:
-				Review with given id.
+        Raises:
+            NotFoundError: if place or user not in repo
 
-		Raises:
-				NotFoundError: if review not in repo
+        """
+        user = self.user_repo.get(review_data["user_id"])
+        place = self.place_repo.get(review_data["place_id"])
+        if user is None:
+            raise NotFoundError("User not found")
+        if place is None:
+            raise NotFoundError("Place not found")
 
-		"""
-		review = self.review_repo.get(review_id)
-		if review is None:
-			raise NotFoundError("Review not found")
-		return review
+        review_data_copy = review_data.copy()
+        review_data_copy["user"] = user
+        review_data_copy["place"] = place
+        if "user_id" in review_data_copy:
+            del review_data_copy["user_id"]
+        if "place_id" in review_data_copy:
+            del review_data_copy["place_id"]
 
-	def get_all_reviews(self) -> list:
-		"""Get a list of all reviews.
+        review = Review(**review_data_copy)
+        self.review_repo.add(review)
+        return review
 
-		Returns:
-				List of all reviews
+    def get_review(self, review_id: str) -> Review:
+        """Get review by id.
 
-		"""
-		return self.review_repo.get_all()
+        Returns:
+            Review with given id.
 
-	def update_review(self, review_id: str, review_data: dict) -> Review:
-		"""Update a review.
+        Raises:
+            NotFoundError: if review not in repo
 
-		Returns:
-				Updated review.
+        """
+        review = self.review_repo.get(review_id)
+        if review is None:
+            raise NotFoundError("Review not found")
+        return review
 
-		Raises:
-				NotFoundError: if review not in repo
+    def get_all_reviews(self) -> list:
+        """Get a list of all reviews.
 
-		"""
-		review = self.review_repo.get(review_id)
-		if review is None:
-			raise NotFoundError("Review not found")
-		self.review_repo.update(review_id, review_data)
-		return review
+        Returns:
+            List of all reviews
 
-	def delete_review(self, review_id: str) -> None:
-		"""Delete Review.
+        """
+        return self.review_repo.get_all()
 
-		Raises:
-				NotFoundError: if review not in repo
+    def update_review(self, review_id: str, review_data: dict) -> Review:
+        """Update a review.
 
-		"""
-		review = self.review_repo.get(review_id)
-		if review is None:
-			raise NotFoundError("Review not found")
-		self.review_repo.delete(review_id)
+        Returns:
+            Updated review.
 
-	def get_reviews_by_place(self, place_id: str) -> list:
-		"""Get a list of reviews for a place.
+        Raises:
+            NotFoundError: if review not in repo
 
-		Returns:
-				List of reviews for place
+        """
+        review = self.review_repo.get(review_id)
+        if review is None:
+            raise NotFoundError("Review not found")
+        self.review_repo.update(review_id, review_data)
+        return review
 
-		Raises:
-				NotFoundError: if place not in repo
+    def delete_review(self, review_id: str) -> None:
+        """Delete Review.
 
-		"""
-		place = self.place_repo.get(place_id)
-		if place is None:
-			raise NotFoundError("Place not found")
+        Raises:
+            NotFoundError: if review not in repo
 
-		return place.reviews
+        """
+        review = self.review_repo.get(review_id)
+        if review is None:
+            raise NotFoundError("Review not found")
+        self.review_repo.delete(review_id)
+
+    def get_reviews_by_place(self, place_id: str) -> list:
+        """Get a list of reviews for a place.
+
+        Returns:
+            List of reviews for place
+
+        Raises:
+            NotFoundError: if place not in repo
+
+        """
+        place = self.place_repo.get(place_id)
+        if place is None:
+            raise NotFoundError("Place not found")
+
+        return place.reviews

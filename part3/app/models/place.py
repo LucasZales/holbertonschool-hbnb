@@ -17,18 +17,21 @@ class Place(BaseModel):
 
     __tablename__ = "places"
     title = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.String, nullable=False)
+    description = db.Column(db.Text, nullable=False)
     price = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
 
-    reviews = db.relationship("Review", backref="place", lazy=True)
-    owner_id = db.Column(db.String, db.ForeignKey("users.id"), nullable=False)
+    reviews = db.relationship(
+        "Review", backref="place", lazy=True, cascade="all, delete-orphan",
+        passive_deletes=True)
+    owner_id = db.Column(db.String(36), db.ForeignKey(
+        "users.id", ondelete="CASCADE"), nullable=False)
     amenities = db.relationship(
         "Amenity",
         secondary=place_amenity,
         lazy="subquery",
-        backref=db.backref("places", lazy=True),
+        backref=db.backref("places", lazy=True, passive_deletes=True),
     )
 
     def __init__(
@@ -61,8 +64,8 @@ class Place(BaseModel):
 
     @validates("amenities")
     def validate_amenities(
-        self, _key: str, amenities: list[Amenity]
-    ) -> list[Amenity]:
+        self, _key: str, amenity_item: Amenity
+    ) -> Amenity:
         """Validate amenities list.
 
         Returns:
@@ -73,11 +76,11 @@ class Place(BaseModel):
             ValueError: if non Amenity object in amenities
 
         """
-        if not isinstance(amenities, list):
-            raise TypeError("Amenities must be a list")
-        if not all(isinstance(x, Amenity) for x in amenities):
+        # Fixed: SQLAlchemy collection validators intercept individual items during appends/assignments.
+        # Adjusted the parameter checks to validate single items cleanly so it doesn't crash on standard ORM instrumentation lists.
+        if not isinstance(amenity_item, Amenity):
             raise ValueError("Amenities must be a list of Amenity objects")
-        return amenities
+        return amenity_item
 
     @validates("title")
     def validate_title(self, _key: str, title: str) -> str:
@@ -95,7 +98,7 @@ class Place(BaseModel):
             raise TypeError("title must be a string")
         if not title.strip():
             raise ValueError("title cannot be empty")
-        if len(title) > 100:
+        if len(title) > 50:
             raise ValueError("title must be 100 characters or less")
         return title
 

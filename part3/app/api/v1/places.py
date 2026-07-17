@@ -31,7 +31,6 @@ class PlaceList(Resource):
 
         """
         place_data = api.payload.copy()
-        place_data["owner_id"] = get_jwt_identity()
 
         try:
             new_place = facade.create_place(place_data)
@@ -81,7 +80,6 @@ class PlaceResource(Resource):
             mask="{id,title,description,price,latitude,longitude,owner,amenities}",
         )
 
-    @api.expect(place_model, validate=True)
     @api.response(200, "Place successfully updated")
     @api.response(404, "Place not found")
     @api.response(400, "Invalid input data")
@@ -99,8 +97,9 @@ class PlaceResource(Resource):
             facade.update_place(place_id, place_data)
         except NotFoundError as e:
             return {"error": str(e)}, 404
-        except ValueError as e:
-            return {"error": str(e)}, 400
+        except Exception as e:
+            print("UNKNOWN ERR:", repr(e))
+            return {"error": str(e)}, 500
 
         return {"message": "Place updated successfully"}, 200
 

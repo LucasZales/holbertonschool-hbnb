@@ -10,7 +10,7 @@ class Amenity(BaseModel):
     """Amenity class for HBnB."""
 
     __tablename__ = "amenities"
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False, unique=True)
 
     def __init__(self, name: str) -> None:
         """Init for Amenity class."""

@@ -68,7 +68,9 @@ class InMemoryRepository[BaseType: BaseModel](Repository):
         """Update and object in the repo."""
         obj = self.get(obj_id)
         if obj:
-            obj.update(data)
+            for key, value in data.items():
+                if hasattr(obj, key):
+                    setattr(obj, key, value)
 
     def delete(self, obj_id: str) -> None:
         """Delete an object from the repo."""
@@ -129,7 +131,8 @@ class SQLAlchemyRepository[BaseType: BaseModel](Repository):
         obj = self.get(obj_id)
         if obj:
             for key, value in data.items():
-                setattr(obj, key, value)
+                if hasattr(obj, key):
+                    setattr(obj, key, value)
             db.session.commit()
 
     def delete(self, obj_id: str) -> None:

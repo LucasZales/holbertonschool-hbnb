@@ -13,9 +13,11 @@ class BaseModel(db.Model):
     id = db.Column(
         db.String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
+    created_at = db.Column(db.DateTime, nullable=False,
+                           default=lambda: datetime.now(UTC))
     updated_at = db.Column(
         db.DateTime,
+        nullable=False,
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )

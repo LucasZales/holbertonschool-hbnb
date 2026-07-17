@@ -41,3 +41,13 @@ def create_app(
     api.add_namespace(reviews_ns, path="/api/v1/reviews")
     api.add_namespace(auth_ns, path="/api/v1/auth")
     return app
+
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return {"msg": "Signature verification failed"}, 401
+
+
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    return {"msg": "Missing Authorization Header"}, 401

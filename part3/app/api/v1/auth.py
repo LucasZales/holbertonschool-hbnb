@@ -25,20 +25,26 @@ class Login(Resource):
             Success status of login and potential jwt
 
         """
-        credentials = (
-            api.payload
-        )  # Get the email and password from the request payload
+        credentials = api.payload
+
+        print("LOGIN EMAIL:", credentials["email"])
+        print("LOGIN PASSWORD:", credentials["password"])
 
         # Step 1: Retrieve the user based on the provided email
         try:
             user = facade.get_user_by_email(credentials["email"])
         except NotFoundError:
+            print("USER NOT FOUND")
             return {"error": "Invalid credentials"}, 401
+
+        print("FOUND USER:", user.email)
+        print("FOUND HASH:", user.password)
+        print("VERIFY RESULT:", user.verify_password(
+            credentials["password"]))
 
         # Step 2: Check if the user exists and the password is correct
         if not user.verify_password(credentials["password"]):
             return {"error": "Invalid credentials"}, 401
-
         # Step 3: Create a JWT token with the user's id and is_admin flag
         access_token = create_access_token(
             identity=str(user.id),
@@ -84,8 +90,8 @@ def jwt_authorise(get_object):
 
             try:
                 obj = get_object(object_id)
-            except NotFoundError:
-                return {"error": "Resource not found."}, 404
+            except NotFoundError as e:
+                return {"error": str(e)}, 404
 
             if obj is None:
                 return {"error": "Resource not found."}, 404
