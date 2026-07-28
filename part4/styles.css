@@ -59,6 +59,13 @@ main {
     padding: 2rem;
 }
 
+/* Places list */
+
+.places-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
 
 /* Places cards */
 
@@ -68,6 +75,17 @@ main {
     border: 1px solid #ddd;
     border-radius: 10px;
     background-color: white;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.place-card img {
+    width: 60%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto 20px;
 }
 
 
@@ -81,6 +99,10 @@ main {
     border-radius: 5px;
 }
 
+.details-button:hover {
+    background-color: #ffb38a;
+    color: #333;
+}
 
 /* Place details */
 
