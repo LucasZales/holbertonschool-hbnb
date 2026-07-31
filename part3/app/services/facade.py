@@ -31,7 +31,6 @@ class HBnBFacade:
         """
         user = User(**user_data)
         # What does this line do, does it mean i need to rewrite the init for User class?
-        user.hash_password(user_data["password"])
         self.user_repo.add(user)
         return user
 
