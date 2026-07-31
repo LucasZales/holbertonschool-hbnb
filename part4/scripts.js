@@ -1,3 +1,8 @@
+/*
+ * Handles user login functionality.
+ * Sends credentials to the API and stores the JWT token after success.
+ */
+
 document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.getElementById("login-form");
 
