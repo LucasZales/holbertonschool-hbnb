@@ -1,65 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List of Places</title>
+    <title>HBnB - Places</title>
+
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="images/icon.png">
 </head>
-<body>
-    <header>
-    <img src="images/logo.png" alt="HBnB Logo" class="logo">
 
-    <a href="login.html" class="login-button">Login</a>
+<body>
+
+    <header>
+        <img src="images/logo.png" alt="HBnB Logo" class="logo">
+
+        <a href="login.html" id="login-link" class="login-button">
+            Login
+        </a>
     </header>
+
 
     <nav>
         <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="login.html">Login</a></li>
+            <li>
+                <a href="index.html">Home</a>
+            </li>
+
+            <li>
+                <a href="login.html">Login</a>
+            </li>
         </ul>
     </nav>
 
+
     <main>
-    <section id="filter">
-        <label for="price-filter">Max Price:</label>
-        <select id="price-filter">
-            <option value="">All</option>
-            <option value="100">$100</option>
-            <option value="150">$150</option>
-            <option value="200">$200</option>
-        </select>
-    </section>
 
-    <section id="places-list" class="places-list">
-        <article class="place-card">
-            <img src="images/house1.jpg" alt="House 1">
+        <section id="filter">
 
-            <h2>House 1</h2>
-            <p>Price per night: $100</p>
-            <a href="place.html" class="details-button">View Details</a>
-        </article>
+            <label for="price-filter">
+                Max Price:
+            </label>
 
-        <article class="place-card">
-            <img src="images/house2.png" alt="House 2">
-            <h2>House 2</h2>
-            <p>Price per night: $150</p>
-            <a href="place.html" class="details-button">View Details</a>
-        </article>
+            <select id="price-filter">
 
-        <article class="place-card">
-            <img src="images/house3.jpg" alt="House 3">
-            <h2>House 3</h2>
-            <p>Price per night: $200</p>
-            <a href="place.html" class="details-button">View Details</a>
-        </article>
-    </section>
+                <option value="all">
+                    All
+                </option>
+
+                <option value="10">
+                    10
+                </option>
+
+                <option value="50">
+                    50
+                </option>
+
+                <option value="100">
+                    100
+                </option>
+
+            </select>
+
+        </section>
+
+
+        <section id="places-list" class="places-list">
+
+            <!-- JavaScript va a cargar las casas acá -->
+
+        </section>
+
+
     </main>
+
+
     <footer>
-    <p>&copy; 2026 HBnB. All rights reserved.</p>
+
+        <p>
+            &copy; 2026 HBnB. All rights reserved.
+        </p>
+
     </footer>
 
+
     <script src="scripts.js"></script>
+
 </body>
+
 </html>
