@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HBnB - Places</title>
-
+    <title>List of Places</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="images/icon.png">
 </head>
@@ -13,23 +12,20 @@
 <body>
 
     <header>
+
+    <a href="index.html">
         <img src="images/logo.png" alt="HBnB Logo" class="logo">
+    </a>
 
-        <a href="login.html" id="login-link" class="login-button">
-            Login
-        </a>
+    <a href="login.html" class="login-button" id="login-link">
+        Login
+    </a>
+
     </header>
-
 
     <nav>
         <ul>
-            <li>
-                <a href="index.html">Home</a>
-            </li>
-
-            <li>
-                <a href="login.html">Login</a>
-            </li>
+            <li><a href="index.html">Home</a></li>
         </ul>
     </nav>
 
@@ -37,50 +33,90 @@
     <main>
 
         <section id="filter">
-
-            <label for="price-filter">
-                Max Price:
-            </label>
+            <label for="price-filter">Max Price:</label>
 
             <select id="price-filter">
-
-                <option value="all">
-                    All
-                </option>
-
-                <option value="10">
-                    10
-                </option>
-
-                <option value="50">
-                    50
-                </option>
-
-                <option value="100">
-                    100
-                </option>
-
+                <option value="all">All</option>
+                <option value="10">$10</option>
+                <option value="50">$50</option>
+                <option value="100">$100</option>
             </select>
-
         </section>
 
 
         <section id="places-list" class="places-list">
 
-            <!-- JavaScript va a cargar las casas acá -->
+            <article class="place-card" data-price="100">
+
+                <img src="images/house1.jpg" alt="House 1">
+
+                <h2>Beach House</h2>
+
+                <p>
+                    Beautiful house near the beach.
+                </p>
+
+                <p>
+                    Price per night: $100
+                </p>
+
+                <a href="place.html" class="details-button">
+                    View Details
+                </a>
+
+            </article>
+
+
+            <article class="place-card" data-price="50">
+
+                <img src="images/house2.png" alt="House 2">
+
+                <h2>Mountain House</h2>
+
+                <p>
+                    Quiet place in the mountains.
+                </p>
+
+                <p>
+                    Price per night: $50
+                </p>
+
+                <a href="place.html" class="details-button">
+                    View Details
+                </a>
+
+            </article>
+
+
+            <article class="place-card" data-price="10">
+
+                <img src="images/house3.jpg" alt="House 3">
+
+                <h2>Small Apartment</h2>
+
+                <p>
+                    Comfortable city apartment.
+                </p>
+
+                <p>
+                    Price per night: $10
+                </p>
+
+                <a href="place.html" class="details-button">
+                    View Details
+                </a>
+
+            </article>
 
         </section>
-
 
     </main>
 
 
     <footer>
-
         <p>
             &copy; 2026 HBnB. All rights reserved.
         </p>
-
     </footer>
 
 
